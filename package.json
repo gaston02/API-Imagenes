@@ -1,0 +1,19 @@
+{
+  "name": "api-back-end-imagenes",
+  "version": "1.0.0",
+  "description": "API back-end con Express para subir imagenes",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "Gaston Fuentes",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
