@@ -1,29 +1,29 @@
-import LoginService from "../services/login.service.js";
-import UserService from "../services/user.service.js";
-import { handleGenericError } from "../utils/errorAdmon.util.js";
+import * as loginService from "../services/login.service.js";
+import * as userService from "../services/user.service.js";
+import { handleGenericError } from "../utils/error.util.js";
 import { handleGenericSuccess } from "../utils/success.util.js";
 import { createToken } from "../libs/jwt.js";
 
 export async function loginController(req, res, next) {
   const { email, password } = req.body;
   try {
-    const success = await LoginService.login(email, password);
+    const success = await loginService.login(email, password);
     if (success) {
-      const user = await UserService.findUser(email);
+      const user = await userService.findUser(email);
       if (user) {
         const token = createToken({ id: user._id });
         res.cookie("token", token);
         handleGenericSuccess(
           res,
           200,
-          client,
+          user,
           "Usario logeado correctamente!!"
         );
       } else {
         handleGenericError(
           res,
           404,
-          `Cliente con el correo ${email} no encontrado`
+          `Usuario con el correo ${email} no encontrado`
         );
       }
     }

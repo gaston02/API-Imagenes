@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const createUserSchema = z.object({
-  name: z
+  nameUser: z
     .string({ required_error: "Nombre es requerido" })
-    .min(3, {
-      message: "El nombre debe tener al menos 3 caracteres",
+    .min(5, {
+      message: "El nombre debe tener al menos 5 caracteres",
     })
     .refine((data) => data.trim() !== "", {
       message: "El nombre no puede estar vacío",
@@ -66,15 +66,15 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  name: z
+  nameUser: z
     .string()
     .optional()
     .refine(
       (data) =>
-        data === undefined || (data.trim() !== "" && data.trim().length >= 3),
+        data === undefined || (data.trim() !== "" && data.trim().length >= 5),
       {
         message:
-          "El nombre no puede estar vacío, ni puede tener menos de 3 caracteres",
+          "El nombre no puede estar vacío, ni puede tener menos de 5 caracteres",
       }
     ),
   email: z

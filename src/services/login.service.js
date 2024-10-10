@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
-import UserService from "./user.service.js";
+import * as userService from "./user.service.js";
 
 export async function login(email, password) {
   try {
-    const userExists = await UserService.findUser(email);
+    const userExists = await userService.findUser(email);
     if (!userExists) {
       return false;
     }

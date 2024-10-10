@@ -1,12 +1,12 @@
-import UserService from "../services/user.service.js";
+import * as userService from "../services/user.service.js";
 import { handleGenericError } from "../utils/error.util.js";
 import { handleGenericSuccess } from "../utils/success.util.js";
 
 export async function createUserController(req, res, next) {
   try {
-    const { name, email, password, profileImage, userInfo } = req.body;
-    const userData = { name, email, password, profileImage, userInfo };
-    const newUser = await UserService.createUser(userData);
+    const { nameUser, email, password, profileImage, userInfo } = req.body;
+    const userData = { nameUser, email, password, profileImage, userInfo };
+    const newUser = await userService.createUser(userData);
     return handleGenericSuccess(
       res,
       201,
