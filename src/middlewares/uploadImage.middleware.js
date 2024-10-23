@@ -4,7 +4,7 @@ import path from "path";
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Carpeta donde se guardarán las imágenes
+    cb(null, "../../uploads"); // Carpeta donde se guardarán las imágenes
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -25,5 +25,5 @@ const fileFilter = (req, file, cb) => {
 export const uploadImage = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 1 * 1024 * 1024 }, // Tamaño máximo del archivo: 1MB
+  limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño máximo del archivo: 5MB
 }).single("image"); // 'image' es el nombre del campo del formulario donde se sube la imagen

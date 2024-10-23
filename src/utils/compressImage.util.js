@@ -1,11 +1,17 @@
 import sharp from "sharp";
 
-export const compressImage = async (inputPath, outputPath) => {
+export const compressImage = async (inputPath, outputPath, maxWidth = 800) => {
   try {
-    // Verificar el formato y convertir a JPEG
+    // Aplicar compresión utilizando WebP, que suele ser más eficiente que JPEG
     await sharp(inputPath)
-      .resize(800) // Redimensionar a un ancho de 800px, manteniendo la relación de aspecto
-      .toFormat("jpeg", { quality: 80 }) // Convertir a JPEG con calidad del 80%
+      .resize({
+        width: maxWidth, // Redimensionar con un ancho máximo configurable
+        withoutEnlargement: true, // Evitar agrandar imágenes más pequeñas
+      })
+      .webp({
+        quality: 80, // Ajustar la calidad a un 85% (buen balance entre calidad y tamaño)
+        effort: 6, // Nivel de esfuerzo de compresión (1 más rápido, 6 mayor compresión)
+      })
       .toFile(outputPath);
 
     console.log(`Imagen comprimida y guardada en: ${outputPath}`);
