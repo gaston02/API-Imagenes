@@ -5,7 +5,6 @@ const imageSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     path: {
@@ -23,6 +22,7 @@ const imageSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     gallery: {
       type: Schema.Types.ObjectId,
@@ -32,5 +32,8 @@ const imageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+imageSchema.index({ user: 1 });
+
 
 export default mongoose.model("Image", imageSchema);

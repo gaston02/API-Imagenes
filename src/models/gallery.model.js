@@ -28,9 +28,12 @@ const gallerySchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
   },
   { timestamps: true }
 );
+
+gallerySchema.index({ user: 1 });
 
 export default mongoose.model("Gallery", gallerySchema);
