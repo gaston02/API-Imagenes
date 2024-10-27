@@ -1,3 +1,4 @@
+import path from "path";
 import { compressImage } from "../utils/compressImage.util.js";
 
 export const processImage = async (req, res, next) => {
@@ -9,11 +10,15 @@ export const processImage = async (req, res, next) => {
     }
 
     const inputPath = req.file.path;
-    const outputPath = inputPath;
+
+    // Crear un nuevo outputPath
+    const outputDir = path.dirname(inputPath); // Obtener el directorio del archivo original
+    const outputFileName = `compressed-${path.basename(inputPath)}`; // Cambiar el nombre del archivo
+    const outputPath = path.join(outputDir, outputFileName); // Construir el nuevo path
 
     await compressImage(inputPath, outputPath);
 
-    // Guardar la ruta de la imagen procesada en el objeto de la solicitud
+    // Guardar el outputPath en el objeto req
     req.processedImagePath = outputPath;
 
     next();
