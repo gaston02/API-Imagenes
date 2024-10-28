@@ -14,18 +14,3 @@ export const createImageSchema = z.object({
     }),
   public: z.boolean().default(true),
 });
-
-export const updateImageSchema = z.object({
-  name: z
-    .string()
-    .optional()
-    .refine(
-      (data) =>
-        data === undefined || (data.trim() !== "" && data.trim().length >= 7),
-      {
-        message:
-          "El nombre no puede estar vacío, ni puede tener menos de 7 caracteres",
-      }
-    ),
-  public: z.boolean().default(true),
-});
