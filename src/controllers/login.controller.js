@@ -8,31 +8,32 @@ export async function loginController(req, res, next) {
   const { email, password } = req.body;
   try {
     const success = await loginService.login(email, password);
-    if (success) {
-      const user = await userService.findUser(email);
-      if (user) {
-        const token = createToken({ id: user._id });
-        res.cookie("token", token);
-        handleGenericSuccess(
-          res,
-          200,
-          user,
-          "Usario logeado correctamente!!"
-        );
-      } else {
-        handleGenericError(
-          res,
-          404,
-          `Usuario con el correo ${email} no encontrado`
-        );
-      }
+    if (!success) {
+      return handleGenericError(res, 401, "Credenciales incorrectas");
     }
-  } catch (error) {
-    handleGenericError(
+
+    const user = await userService.findUser(email);
+    if (!user) {
+      return handleGenericError(
+        res,
+        404,
+        `Usuario con el correo ${email} no encontrado`
+      );
+    }
+
+    // Espera el token
+    const token = await createToken({ id: user._id });
+    res.cookie("token", token, { httpOnly: true }); // Agrega opciones como httpOnly por seguridad
+
+    // Incluye el token en la respuesta
+    handleGenericSuccess(
       res,
-      500,
-      `Error al hacer el login ${error.message} no encontrado`
+      200,
+      { ...user._doc, token }, // Incluye el token aquí
+      "Usuario logeado correctamente!!"
     );
+  } catch (error) {
+    handleGenericError(res, 500, `Error al hacer el login: ${error.message}`);
     next(error);
   }
 }
