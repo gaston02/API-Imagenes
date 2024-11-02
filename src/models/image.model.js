@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const imageSchema = new mongoose.Schema(
+const { Schema } = mongoose;
+
+const imageSchema = new Schema(
   {
     name: {
       type: String,
@@ -34,6 +36,5 @@ const imageSchema = new mongoose.Schema(
 );
 
 imageSchema.index({ user: 1 });
-
 
 export default mongoose.model("Image", imageSchema);
