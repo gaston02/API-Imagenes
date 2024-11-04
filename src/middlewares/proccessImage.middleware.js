@@ -18,8 +18,8 @@ export const processImage = async (req, res, next) => {
 
     await compressImage(inputPath, outputPath);
 
-    // Guardar el outputPath en el objeto req
-    req.processedImagePath = outputPath;
+    // Guardar solo el nombre del archivo en req.processedImagePath
+    req.processedImagePath = outputFileName;
 
     next();
   } catch (error) {

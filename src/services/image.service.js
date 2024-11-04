@@ -3,9 +3,7 @@ import path from "path";
 import Image from "../models/image.model.js";
 import User from "../models/user.model.js";
 
-
-// Define la ruta a la carpeta donde se almacenan las imágenes
-const imagesDir = "C:\\Users\\gasto\\OneDrive\\uploads"; // Cambia esta ruta según sea necesario
+const imagesDir = "C:\\Users\\gasto\\OneDrive\\uploads";
 
 export async function createImage(outputPath, userId, imageData) {
   try {
