@@ -27,3 +27,9 @@ export const uploadImage = multer({
   fileFilter: fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño máximo del archivo: 5MB
 }).single("image"); // 'image' es el nombre del campo del formulario donde se sube la imagen
+
+export const profileImage = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño máximo del archivo: 5MB
+}).single("profileImage"); // 'profileImage' es el nombre del campo del formulario donde se sube la imagen

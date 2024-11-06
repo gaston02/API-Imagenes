@@ -5,22 +5,18 @@ export async function createUser(userData) {
   try {
     const { nameUser, email, password, profileImage, userInfo } = userData;
 
-    // Verificar si el usuario ya existe por el email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new Error("El correo ya está registrado.");
     }
 
-    // Verificar si el nameUser ya existe
     const existingUserByName = await User.findOne({ nameUser });
     if (existingUserByName) {
       throw new Error("El nombre de usuario ya está registrado.");
     }
 
-    // Hashear la contraseña antes de guardar
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear el nuevo usuario
     const newUser = new User({
       nameUser,
       email,
@@ -31,7 +27,6 @@ export async function createUser(userData) {
       images: [], // Inicialmente vacío
     });
 
-    // Guardar el usuario en la base de datos
     const savedUser = await newUser.save();
     return savedUser;
   } catch (error) {

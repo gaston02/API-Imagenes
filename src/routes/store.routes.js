@@ -12,7 +12,6 @@ const router = Router();
 
 router.post(
   "/registro/usuario",
-  validateSchema(createUserSchema),
   createUserController
 );
 
