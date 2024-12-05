@@ -100,6 +100,33 @@ export const updateUserSchema = z.object({
             "La contraseña debe tener al menos 6 caracteres y una letra mayúscula",
         })
     ),
-  profileImage: z.string().optional(),
+  profileImage: z
+    .string()
+    .optional()
+    .refine(
+      (data) => {
+        if (data !== undefined && data.trim() === "") {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "La imagen no puede estar vacía",
+      }
+    ),
+  userInfo: z
+    .string()
+    .optional()
+    .refine(
+      (data) => {
+        if (data !== undefined && data.trim() === "") {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "La informacion del usuario no puede estar vacia",
+      }
+    ),
   status: z.boolean().default(true),
 });

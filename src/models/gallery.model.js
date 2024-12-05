@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const gallerySchema = new mongoose.Schema(
+const { Schema } = mongoose; // Desestructuramos Schema de mongoose
+
+const gallerySchema = new Schema(
   {
     name: {
       type: String,
@@ -14,7 +16,7 @@ const gallerySchema = new mongoose.Schema(
     },
     images: [
       {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId, 
         ref: "Image",
         required: true,
       },
