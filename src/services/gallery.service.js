@@ -1,5 +1,6 @@
 import Gallery from "../models/gallery.model.js";
 import Image from "../models/image.model.js";
+import User from "../models/user.model.js";
 
 export async function createGallery(galleryData, imageIds) {
   const { userId, name, description } = galleryData;
@@ -39,6 +40,20 @@ export async function createGallery(galleryData, imageIds) {
       return image.save();
     })
   );
+
+  // Actualizar al usuario para incluir la nueva galería
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("Usuario no encontrado.");
+  }
+
+  // Suponiendo que el usuario tiene un campo `galleries` que es un array
+  if (!Array.isArray(user.galleries)) {
+    user.galleries = [];
+  }
+  user.galleries.push(newGallery._id);
+
+  await user.save();
 
   return newGallery;
 }

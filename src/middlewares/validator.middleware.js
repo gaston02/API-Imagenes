@@ -94,3 +94,42 @@ export const validateUserSchemaWithFileAndCleanup =
       return res.status(400).json({ error: errorMessage });
     }
   };
+
+export const validateUserSchemaWithFileAndCleanupForUpdate =
+  (schema, fileKey, uploadDir) => (req, res, next) => {
+    try {
+      const data = {
+        nameUser: req.body.nameUser || undefined,
+        email: req.body.email || undefined,
+        password: req.body.password || undefined,
+        profileImage: req[fileKey] || undefined,
+        userInfo: req.body.userInfo || undefined,
+      };
+
+      schema.parse(data);
+
+      next();
+    } catch (error) {
+      // Limpiar el archivo en caso de error (si se subió un archivo y ocurrió un error de validación)
+      if (req[fileKey]) {
+        const filePath = path.join(uploadDir, req[fileKey]);
+        fs.unlink(filePath, (unlinkError) => {
+          if (unlinkError) {
+            if (unlinkError.code === "ENOENT") {
+              console.log("El archivo ya no existe, nada que eliminar.");
+            } else {
+              console.error(
+                `Error al eliminar la imagen: ${unlinkError.message}`
+              );
+            }
+          } else {
+            console.log("Imagen inválida eliminada correctamente.");
+          }
+        });
+      }
+
+      // Devolver el error al cliente
+      const errorMessage = error.errors?.[0]?.message || "Error de validación";
+      return res.status(400).json({ error: errorMessage });
+    }
+  };
