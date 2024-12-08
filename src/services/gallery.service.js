@@ -33,10 +33,15 @@ export async function createGallery(galleryData, imageIds) {
     images: images.map((image) => image._id), // Aquí estamos pasando los _id de las imágenes
   });
 
-  // Actualizar las imágenes para que apunten a la nueva galería
+  // Actualizar las imágenes para incluir el ID de la nueva galería en su arreglo `galleries`
   await Promise.all(
     images.map((image) => {
-      image.gallery = newGallery._id; // Actualizamos cada imagen con el ID de la nueva galería
+      if (!Array.isArray(image.galleries)) {
+        image.galleries = [];
+      }
+      if (!image.galleries.includes(newGallery._id)) {
+        image.galleries.push(newGallery._id);
+      }
       return image.save();
     })
   );

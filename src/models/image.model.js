@@ -26,11 +26,12 @@ const imageSchema = new Schema(
       required: true,
       index: true,
     },
-    gallery: {
-      type: Schema.Types.ObjectId,
-      ref: "Gallery",
-      required: false,
-    },
+    galleries: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Gallery",
+      },
+    ],
   },
   { timestamps: true }
 );

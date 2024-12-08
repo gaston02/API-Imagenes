@@ -9,16 +9,22 @@ const imagesDir = IMAGES_DIR;
 
 export async function createImage(outputPath, userId, imageData) {
   try {
-    let gallery = null;
-    // Validar la galería si se proporciona un galleryId
-    if (imageData.galleryId) {
-      gallery = await Gallery.findOne({
-        _id: imageData.galleryId,
+    const galleries = [];
+    // Validar las galerías si se proporcionan galleryIds
+    if (imageData.galleryIds && Array.isArray(imageData.galleryIds)) {
+      const validGalleries = await Gallery.find({
+        _id: { $in: imageData.galleryIds },
         user: userId,
       });
-      if (!gallery) {
-        throw new Error("La galería no existe o no pertenece al usuario.");
+
+      if (validGalleries.length !== imageData.galleryIds.length) {
+        throw new Error(
+          "Algunas galerías no existen o no pertenecen al usuario."
+        );
       }
+
+      // Agregar las galerías válidas al arreglo
+      galleries.push(...validGalleries.map((gallery) => gallery._id));
     }
 
     const newImage = new Image({
@@ -26,7 +32,7 @@ export async function createImage(outputPath, userId, imageData) {
       path: outputPath,
       public: imageData.public || true,
       user: userId,
-      gallery: gallery ? gallery._id : null, // Asociar la galería si existe
+      galleries,
     });
 
     const savedImage = await newImage.save();
@@ -34,11 +40,15 @@ export async function createImage(outputPath, userId, imageData) {
     // Actualiza el usuario para incluir la nueva imagen en el arreglo de imágenes
     await User.findByIdAndUpdate(userId, { $push: { images: savedImage._id } });
 
-    // Si existe una galería, actualizarla para incluir la nueva imagen
-    if (gallery) {
-      await Gallery.findByIdAndUpdate(gallery._id, {
-        $push: { images: savedImage._id },
-      });
+    // Actualiza cada galería para incluir la imagen en su arreglo
+    if (galleries.length > 0) {
+      await Promise.all(
+        galleries.map((galleryId) =>
+          Gallery.findByIdAndUpdate(galleryId, {
+            $push: { images: savedImage._id },
+          })
+        )
+      );
     }
 
     return savedImage;
