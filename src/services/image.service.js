@@ -2,23 +2,44 @@ import fs from "fs";
 import path from "path";
 import Image from "../models/image.model.js";
 import User from "../models/user.model.js";
+import Gallery from "../models/gallery.model.js";
+import { IMAGES_DIR } from "../config.js";
 
-const imagesDir = "C:\\Users\\gasto\\OneDrive\\uploads";
+const imagesDir = IMAGES_DIR;
 
 export async function createImage(outputPath, userId, imageData) {
   try {
+    let gallery = null;
+    // Validar la galería si se proporciona un galleryId
+    if (imageData.galleryId) {
+      gallery = await Gallery.findOne({
+        _id: imageData.galleryId,
+        user: userId,
+      });
+      if (!gallery) {
+        throw new Error("La galería no existe o no pertenece al usuario.");
+      }
+    }
+
     const newImage = new Image({
       name: imageData.name,
       path: outputPath,
       public: imageData.public || true,
       user: userId,
-      gallery: imageData.galleryId || null,
+      gallery: gallery ? gallery._id : null, // Asociar la galería si existe
     });
 
     const savedImage = await newImage.save();
 
     // Actualiza el usuario para incluir la nueva imagen en el arreglo de imágenes
     await User.findByIdAndUpdate(userId, { $push: { images: savedImage._id } });
+
+    // Si existe una galería, actualizarla para incluir la nueva imagen
+    if (gallery) {
+      await Gallery.findByIdAndUpdate(gallery._id, {
+        $push: { images: savedImage._id },
+      });
+    }
 
     return savedImage;
   } catch (error) {

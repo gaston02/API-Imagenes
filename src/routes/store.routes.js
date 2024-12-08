@@ -9,10 +9,11 @@ import {
 } from "../middlewares/validator.middleware.js";
 import { loginSchema } from "../schemas/login.schema.js";
 import { createUserSchema } from "../schemas/user.schema.js";
+import { IMAGES_DIR } from "../config.js";
 
 const router = Router();
 
-const UPLOADS_DIR = "C:/Users/gasto/OneDrive/uploads";
+const uploadsDir = IMAGES_DIR;
 
 router.post(
   "/registro/usuario",
@@ -21,7 +22,7 @@ router.post(
   validateUserSchemaWithFileAndCleanup(
     createUserSchema,
     "processedImagePath",
-    UPLOADS_DIR
+    uploadsDir
   ),
   createUserController
 );

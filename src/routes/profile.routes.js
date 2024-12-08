@@ -16,9 +16,10 @@ import {
 import { createImageSchema } from "../schemas/image.schema.js";
 import { createGallerySchema } from "../schemas/gallery.schema.js";
 import { updateUserSchema } from "../schemas/user.schema.js";
+import { IMAGES_DIR } from "../config.js";
 
 const router = Router();
-const UPLOADS_DIR = "C:/Users/gasto/OneDrive/uploads";
+const uploadsDir = IMAGES_DIR;
 
 router.post(
   "/upload/image",
@@ -28,7 +29,7 @@ router.post(
   validateSchemaWithFileAndCleanup(
     createImageSchema,
     "processedImagePath",
-    UPLOADS_DIR
+    uploadsDir
   ),
   createImageController
 );
@@ -48,7 +49,7 @@ router.put(
   validateUserSchemaWithFileAndCleanupForUpdate(
     updateUserSchema,
     "processedImagePath",
-    UPLOADS_DIR
+    uploadsDir
   ),
   updateUserController
 );
