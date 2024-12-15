@@ -4,10 +4,7 @@ import { createGalleryController } from "../controllers/galery.controller.js";
 import { updateUserController } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middlewares/verifyToken.middleware.js";
 import { uploadImage } from "../middlewares/uploadImage.middleware.js";
-import {
-  processImage,
-  processImageUpdate,
-} from "../middlewares/proccessImage.middleware.js";
+import { processImage } from "../middlewares/proccessImage.middleware.js";
 import {
   validateSchemaWithFileAndCleanup,
   validateSchema,
@@ -45,7 +42,7 @@ router.put(
   "/actualizar/usuario/:email",
   authMiddleware,
   uploadImage,
-  processImageUpdate,
+  processImage,
   validateUserSchemaWithFileAndCleanupForUpdate(
     updateUserSchema,
     "processedImagePath",

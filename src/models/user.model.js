@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
       required: false,
       trim: true,
       unique: true,
+      sparse: true, // Permite múltiples `null` en índices únicos
     },
     userInfo: {
       type: String,

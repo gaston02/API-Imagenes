@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 export async function createUser(userData) {
   try {
     const { nameUser, email, password, profileImage, userInfo } = userData;
+    console.log("data de ususario en servicio: ", userData);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -17,15 +18,23 @@ export async function createUser(userData) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    if (!userData.profileImage) {
+      userData.profileImage = "default";
+    }
+
+    console.log("nueva data de usuario en servicio: ", userData);
+
     const newUser = new User({
-      nameUser,
-      email,
+      nameUser: userData.nameUser,
+      email: userData.email,
       password: hashedPassword,
-      profileImage,
-      userInfo,
+      profileImage: userData.profileImage,
+      userInfo: userData.userInfo,
       galleries: [], // Inicialmente vacío
       images: [], // Inicialmente vacío
     });
+
+    console.log("usuario nuevo en service: ", newUser);
 
     const savedUser = await newUser.save();
     return savedUser;
@@ -33,6 +42,22 @@ export async function createUser(userData) {
     throw new Error(`Error al crear el usuario: ${error.message}`);
   }
 }
+
+export async function deleteDefaultProfileImage(idUser) {
+  const updatedUser = await User.findByIdAndUpdate(
+    idUser,
+    { $unset: { profileImage: 1 } }, // Eliminar el campo profileImage
+    { new: true } // Retornar el documento actualizado
+  );
+
+  if (!updatedUser) {
+    throw new Error("Usuario no encontrado o no actualizado");
+  }
+
+  console.log("Usuario después de eliminar profileImage:", updatedUser);
+  return updatedUser;
+}
+
 
 export async function getRandomUser() {
   try {

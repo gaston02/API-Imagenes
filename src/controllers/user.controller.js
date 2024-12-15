@@ -12,16 +12,25 @@ export async function createUserController(req, res, next) {
       userInfo: req.body.userInfo,
     };
 
+    console.log("Entrando a crear usuario en controller");
     const newUser = await userService.createUser(userData);
+
+    // Si el campo profileImage es "default", eliminarlo
+    let realUser = newUser;
+    if (newUser.profileImage === "default") {
+      realUser = await userService.deleteDefaultProfileImage(newUser._id);
+    }
+
+    console.log("Usuario final en controlador:", realUser);
 
     return handleGenericSuccess(
       res,
       201,
-      newUser,
-      "Usuario creado con éxito!!!"
+      realUser,
+      "Usuario creado con éxito!"
     );
   } catch (error) {
-    console.log("entro en catch general");
+    console.log("Error en controlador:", error.message);
     return handleGenericError(
       res,
       400,
@@ -29,6 +38,7 @@ export async function createUserController(req, res, next) {
     );
   }
 }
+
 
 export async function updateUserController(req, res, next) {
   const email = req.params.email;

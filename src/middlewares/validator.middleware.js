@@ -67,7 +67,11 @@ export const validateUserSchemaWithFileAndCleanup =
         userInfo: req.body.userInfo,
       };
 
+      console.log("data final middleware:", data);
+
       schema.parse(data);
+
+      console.log("schema validado correctamente");
 
       next();
     } catch (error) {
