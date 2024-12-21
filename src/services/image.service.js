@@ -67,13 +67,11 @@ export async function deleteUncompressedImages() {
       if (!file.startsWith("compressed")) {
         const filePath = path.join(imagesDir, file);
         await fs.promises.unlink(filePath); // Elimina el archivo
-        console.log(`Eliminada: ${filePath}`);
       }
     });
 
     // Espera a que todas las eliminaciones se completen
     await Promise.all(deletePromises);
-    console.log("Eliminación de imágenes no comprimidas completada.");
   } catch (error) {
     throw new Error(
       `Error al eliminar imágenes no comprimidas: ${error.message}`

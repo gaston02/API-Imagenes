@@ -12,7 +12,6 @@ export async function createUserController(req, res, next) {
       userInfo: req.body.userInfo,
     };
 
-    console.log("Entrando a crear usuario en controller");
     const newUser = await userService.createUser(userData);
 
     // Si el campo profileImage es "default", eliminarlo
@@ -21,8 +20,6 @@ export async function createUserController(req, res, next) {
       realUser = await userService.deleteDefaultProfileImage(newUser._id);
     }
 
-    console.log("Usuario final en controlador:", realUser);
-
     return handleGenericSuccess(
       res,
       201,
@@ -30,7 +27,6 @@ export async function createUserController(req, res, next) {
       "Usuario creado con éxito!"
     );
   } catch (error) {
-    console.log("Error en controlador:", error.message);
     return handleGenericError(
       res,
       400,
@@ -39,13 +35,17 @@ export async function createUserController(req, res, next) {
   }
 }
 
-
 export async function updateUserController(req, res, next) {
-  const email = req.params.email;
+  const id = req.params.id;
   const userData = req.body;
 
+  // Asegúrate de agregar processedImagePath si existe
+  if (req.processedImagePath) {
+    userData.profileImage = req.processedImagePath; // Asignar la ruta procesada de la imagen
+  }
+
   try {
-    const updateUser = await userService.updateUser(email, userData);
+    const updateUser = await userService.updateUser(id, userData);
     handleGenericSuccess(
       res,
       200,
@@ -54,7 +54,7 @@ export async function updateUserController(req, res, next) {
     );
   } catch (error) {
     if (error.message.includes("Usuario no encontrados")) {
-      handleGenericError(res, 404, `Administrador no encontrado`);
+      handleGenericError(res, 404, `Usuario no encontrado`);
     } else {
       handleGenericError(
         res,

@@ -25,4 +25,3 @@ export const processImage = async (req, res, next) => {
     next(error);
   }
 };
-

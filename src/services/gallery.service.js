@@ -7,7 +7,6 @@ export async function createGallery(galleryData, imageIds) {
 
   // Validar que imageIds sea un array válido
   if (!Array.isArray(imageIds) || imageIds.length === 0) {
-    console.log("IDs de imágenes recibidos:", imageIds);
     throw new Error("Debe proporcionar un array válido de IDs de imágenes.");
   }
 

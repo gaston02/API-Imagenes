@@ -4,7 +4,6 @@ import User from "../models/user.model.js";
 export async function createUser(userData) {
   try {
     const { nameUser, email, password, profileImage, userInfo } = userData;
-    console.log("data de ususario en servicio: ", userData);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -22,8 +21,6 @@ export async function createUser(userData) {
       userData.profileImage = "default";
     }
 
-    console.log("nueva data de usuario en servicio: ", userData);
-
     const newUser = new User({
       nameUser: userData.nameUser,
       email: userData.email,
@@ -33,8 +30,6 @@ export async function createUser(userData) {
       galleries: [], // Inicialmente vacío
       images: [], // Inicialmente vacío
     });
-
-    console.log("usuario nuevo en service: ", newUser);
 
     const savedUser = await newUser.save();
     return savedUser;
@@ -54,10 +49,8 @@ export async function deleteDefaultProfileImage(idUser) {
     throw new Error("Usuario no encontrado o no actualizado");
   }
 
-  console.log("Usuario después de eliminar profileImage:", updatedUser);
   return updatedUser;
 }
-
 
 export async function getRandomUser() {
   try {
@@ -110,14 +103,14 @@ export async function getUser(idUser) {
   }
 }
 
-export async function updateUser(emailUser, userData) {
+export async function updateUser(id, userData) {
   try {
-    const existingUser = await this.findUser(emailUser);
+    const existingUser = await this.getUser(id);
     if (!existingUser) {
       throw new Error("Usuario no encontrado");
     }
     const updateUser = await User.findOneAndUpdate(
-      { email: emailUser, status: true },
+      { _id: id, status: true },
       { $set: userData },
       { new: true }
     );

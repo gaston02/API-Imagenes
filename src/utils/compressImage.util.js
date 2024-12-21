@@ -24,7 +24,6 @@ export const compressImage = async (
       })
       .toFile(outputPath);
 
-    console.log(`Imagen comprimida y guardada en: ${outputPath}`);
   } catch (error) {
     throw new Error(`Error al procesar la imagen: ${error.message}`);
   }

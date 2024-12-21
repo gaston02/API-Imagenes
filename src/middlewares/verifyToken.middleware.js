@@ -15,3 +15,16 @@ export function authMiddleware(req, res, next) {
     next();
   });
 }
+
+export function checkUserOwnership(req, res, next) {
+  const idParams = req.params.id;
+  const loggedInUser = req.user.id; // El id del usuario autenticado desde el token
+
+  if (idParams !== loggedInUser) {
+    return res
+      .status(403)
+      .json({ message: "No tienes permisos para modificar este usuario" });
+  }
+
+  next();
+}

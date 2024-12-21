@@ -2,8 +2,14 @@ import { Router } from "express";
 import { createImageController } from "../controllers/image.controller.js";
 import { createGalleryController } from "../controllers/galery.controller.js";
 import { updateUserController } from "../controllers/user.controller.js";
-import { authMiddleware } from "../middlewares/verifyToken.middleware.js";
-import { uploadImage } from "../middlewares/uploadImage.middleware.js";
+import {
+  authMiddleware,
+  checkUserOwnership,
+} from "../middlewares/verifyToken.middleware.js";
+import {
+  uploadImage,
+  profileImage,
+} from "../middlewares/uploadImage.middleware.js";
 import { processImage } from "../middlewares/proccessImage.middleware.js";
 import {
   validateSchemaWithFileAndCleanup,
@@ -39,9 +45,10 @@ router.post(
 );
 
 router.put(
-  "/actualizar/usuario/:email",
+  "/actualizar/usuario/:id",
   authMiddleware,
-  uploadImage,
+  checkUserOwnership,
+  profileImage,
   processImage,
   validateUserSchemaWithFileAndCleanupForUpdate(
     updateUserSchema,
