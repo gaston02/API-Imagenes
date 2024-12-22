@@ -78,3 +78,70 @@ export async function deleteUncompressedImages() {
     );
   }
 }
+
+export async function updateImage(imageId, userId, imageData) {
+  try {
+    // Buscar la imagen existente
+    const existingImage = await Image.findById(imageId);
+    if (!existingImage) {
+      throw new Error("Imagen no encontrada.");
+    }
+
+    // Verificar que el usuario sea propietario de la imagen
+    if (existingImage.user.toString() !== userId.toString()) {
+      throw new Error("No tienes permisos para modificar esta imagen.");
+    }
+
+    // Manejar las galerías
+    let galleries = existingImage.galleries; // Mantener las galerías actuales por defecto
+
+    if (imageData.galleryIds) {
+      if (Array.isArray(imageData.galleryIds) && imageData.galleryIds.length > 0) {
+        // Validar las galerías si se proporcionan nuevos IDs
+        const validGalleries = await Gallery.find({
+          _id: { $in: imageData.galleryIds },
+          user: userId,
+        });
+
+        if (validGalleries.length !== imageData.galleryIds.length) {
+          throw new Error(
+            "Algunas galerías no existen o no pertenecen al usuario."
+          );
+        }
+
+        galleries = validGalleries.map((gallery) => gallery._id); // Actualizar las galerías válidas
+      } else {
+        // Si se envía un arreglo vacío, la imagen quedará sin galerías
+        galleries = [];
+      }
+    }
+
+    // Actualizar los campos de la imagen
+    existingImage.name = imageData.name || existingImage.name;
+    existingImage.public = imageData.public ?? existingImage.public;
+    existingImage.galleries = galleries;
+
+    const updatedImage = await existingImage.save();
+
+    // Actualizar las galerías (remover de las anteriores y añadir a las nuevas)
+    await Gallery.updateMany(
+      { images: imageId }, // Remover de galerías antiguas
+      { $pull: { images: imageId } }
+    );
+
+    if (galleries.length > 0) {
+      await Promise.all(
+        galleries.map((galleryId) =>
+          Gallery.findByIdAndUpdate(galleryId, {
+            $addToSet: { images: imageId },
+          })
+        )
+      );
+    }
+
+    return updatedImage;
+  } catch (error) {
+    throw new Error(`Error al actualizar la imagen: ${error.message}`);
+  }
+}
+

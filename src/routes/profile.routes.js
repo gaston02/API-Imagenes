@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { createImageController } from "../controllers/image.controller.js";
+import {
+  createImageController,
+  updateImageController,
+} from "../controllers/image.controller.js";
 import { createGalleryController } from "../controllers/galery.controller.js";
 import { updateUserController } from "../controllers/user.controller.js";
 import {
@@ -14,9 +17,14 @@ import { processImage } from "../middlewares/proccessImage.middleware.js";
 import {
   validateSchemaWithFileAndCleanup,
   validateSchema,
+  validateSchemaParams,
   validateUserSchemaWithFileAndCleanupForUpdate,
 } from "../middlewares/validator.middleware.js";
-import { createImageSchema } from "../schemas/image.schema.js";
+import {
+  createImageSchema,
+  updateImageSchema,
+} from "../schemas/image.schema.js";
+import { idSchema } from "../schemas/id.schema.js";
 import { createGallerySchema } from "../schemas/gallery.schema.js";
 import { updateUserSchema } from "../schemas/user.schema.js";
 import { IMAGES_DIR } from "../config.js";
@@ -50,12 +58,21 @@ router.put(
   checkUserOwnership,
   profileImage,
   processImage,
+  validateSchemaParams(idSchema),
   validateUserSchemaWithFileAndCleanupForUpdate(
     updateUserSchema,
     "processedImagePath",
     uploadsDir
   ),
   updateUserController
+);
+
+router.put(
+  "/actualizar/imagen/:id",
+  authMiddleware,
+  validateSchemaParams(idSchema),
+  validateSchema(updateImageSchema),
+  updateImageController
 );
 
 export default router;

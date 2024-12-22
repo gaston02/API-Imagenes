@@ -36,3 +36,31 @@ export async function createImageController(req, res, next) {
     next(error);
   }
 }
+
+export async function updateImageController(req, res, next) {
+  try {
+    const imageId = req.params.id;
+    const userId = req.user.id;
+    const imageData = req.body;
+
+    const updatedImage = await imageService.updateImage(
+      imageId,
+      userId,
+      imageData
+    );
+
+    handleGenericSuccess(
+      res,
+      200,
+      updatedImage,
+      "Imagen actualizada correctamente!"
+    );
+  } catch (error) {
+    handleGenericError(
+      res,
+      400,
+      `Error al actualizar la imagen: ${error.message}`
+    );
+    next(error);
+  }
+}
