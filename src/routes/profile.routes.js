@@ -3,7 +3,10 @@ import {
   createImageController,
   updateImageController,
 } from "../controllers/image.controller.js";
-import { createGalleryController } from "../controllers/galery.controller.js";
+import {
+  createGalleryController,
+  updateGalleryController,
+} from "../controllers/galery.controller.js";
 import { updateUserController } from "../controllers/user.controller.js";
 import {
   authMiddleware,
@@ -25,7 +28,10 @@ import {
   updateImageSchema,
 } from "../schemas/image.schema.js";
 import { idSchema } from "../schemas/id.schema.js";
-import { createGallerySchema } from "../schemas/gallery.schema.js";
+import {
+  createGallerySchema,
+  updateGallerySchema,
+} from "../schemas/gallery.schema.js";
 import { updateUserSchema } from "../schemas/user.schema.js";
 import { IMAGES_DIR } from "../config.js";
 
@@ -73,6 +79,14 @@ router.put(
   validateSchemaParams(idSchema),
   validateSchema(updateImageSchema),
   updateImageController
+);
+
+router.put(
+  "/actualizar/galeria/:id",
+  authMiddleware,
+  validateSchemaParams(idSchema),
+  validateSchema(updateGallerySchema),
+  updateGalleryController
 );
 
 export default router;

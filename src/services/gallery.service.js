@@ -61,3 +61,70 @@ export async function createGallery(galleryData, imageIds) {
 
   return newGallery;
 }
+
+export async function updateGallery(idGallery, userId, galleryData) {
+  try {
+    const existingGallery = await Gallery.findById(idGallery);
+    if (!existingGallery) {
+      throw new Error("Galería no encontrada.");
+    }
+
+    // Verificar que el usuario sea propietario de la galería
+    if (existingGallery.user.toString() !== userId.toString()) {
+      throw new Error("No tienes permisos para modificar esta galería.");
+    }
+
+    // Manejar las imágenes
+    let images = existingGallery.images; // Mantener las imágenes actuales por defecto
+
+    if (galleryData.imageIds) {
+      if (Array.isArray(galleryData.imageIds) && galleryData.imageIds.length > 0) {
+        // Validar las imágenes si se proporcionan nuevos IDs
+        const validImages = await Image.find({
+          _id: { $in: galleryData.imageIds },
+          user: userId,
+        });
+
+        if (validImages.length !== galleryData.imageIds.length) {
+          throw new Error(
+            "Algunas imágenes no existen o no pertenecen al usuario."
+          );
+        }
+
+        images = validImages.map((image) => image._id); // Actualizar con las imágenes válidas
+      } else {
+        // Si se envía un arreglo vacío, la galería quedará sin imágenes
+        images = [];
+      }
+    }
+
+    // Actualizar los campos de la galería
+    existingGallery.name = galleryData.name || existingGallery.name;
+    existingGallery.description = galleryData.description || existingGallery.description;
+    existingGallery.public = galleryData.public ?? existingGallery.public;
+    existingGallery.images = images;
+
+    const updatedGallery = await existingGallery.save();
+
+    // Actualizar las imágenes (remover la galería de las imágenes antiguas y añadirla a las nuevas)
+    await Image.updateMany(
+      { galleries: idGallery }, // Remover esta galería de las imágenes antiguas
+      { $pull: { galleries: idGallery } }
+    );
+
+    if (images.length > 0) {
+      await Promise.all(
+        images.map((imageId) =>
+          Image.findByIdAndUpdate(imageId, {
+            $addToSet: { galleries: idGallery },
+          })
+        )
+      );
+    }
+
+    return updatedGallery;
+  } catch (error) {
+    throw new Error(`Error al actualizar la galería: ${error.message}`);
+  }
+}
+
