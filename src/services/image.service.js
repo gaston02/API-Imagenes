@@ -96,7 +96,10 @@ export async function updateImage(imageId, userId, imageData) {
     let galleries = existingImage.galleries; // Mantener las galerías actuales por defecto
 
     if (imageData.galleryIds) {
-      if (Array.isArray(imageData.galleryIds) && imageData.galleryIds.length > 0) {
+      if (
+        Array.isArray(imageData.galleryIds) &&
+        imageData.galleryIds.length > 0
+      ) {
         // Validar las galerías si se proporcionan nuevos IDs
         const validGalleries = await Gallery.find({
           _id: { $in: imageData.galleryIds },
@@ -145,3 +148,73 @@ export async function updateImage(imageId, userId, imageData) {
   }
 }
 
+export async function deleteImage(imageId, userId) {
+  try {
+    const image = await Image.findById(imageId);
+    if (!image) {
+      throw new Error("Imagen no encontrada.");
+    }
+
+    // Verificar que el usuario sea propietario de la imagen
+    if (image.user.toString() !== userId.toString()) {
+      throw new Error("No tienes permisos para eliminar esta imagen.");
+    }
+
+    // Eliminar asociaciones con galerías
+    if (image.galleries && image.galleries.length > 0) {
+      await Gallery.updateMany(
+        { _id: { $in: image.galleries } },
+        { $pull: { images: imageId } }
+      );
+    }
+
+    // Eliminar asociación con el usuario
+    await User.findByIdAndUpdate(userId, {
+      $pull: { images: imageId },
+    });
+
+    // Eliminar físicamente la imagen
+    try {
+      await deleteImageFile(imageId);
+    } catch (error) {
+      throw new Error("No se pudo eliminar la imagen físicamente.");
+    }
+
+    const deletedImage = await Image.findByIdAndDelete(imageId);
+
+    return deletedImage;
+  } catch (error) {
+    throw new Error(`Error al eliminar la imagen: ${error.message}`);
+  }
+}
+
+export async function deleteImageFile(imageId) {
+  try {
+    const image = await Image.findById(imageId);
+    if (!image) {
+      throw new Error("Imagen no encontrada.");
+    }
+
+    const relativePath = image.path;
+
+    if (!relativePath) {
+      throw new Error("Ruta de imagen no encontrada en la base de datos.");
+    }
+
+    // Construir la ruta absoluta usando IMAGES_DIR
+    const absolutePath = path.join(imagesDir, relativePath);
+
+    // Verificar si el archivo existe
+    if (!fs.existsSync(absolutePath)) {
+      throw new Error("El archivo de la imagen no existe en el sistema.");
+    }
+
+    // Eliminar el archivo físicamente
+    await fs.promises.unlink(absolutePath);
+    console.log(`Archivo eliminado correctamente: ${absolutePath}`);
+  } catch (error) {
+    throw new Error(
+      `Error al eliminar físicamente la imagen: ${error.message}`
+    );
+  }
+}

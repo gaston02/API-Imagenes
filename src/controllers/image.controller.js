@@ -64,3 +64,26 @@ export async function updateImageController(req, res, next) {
     next(error);
   }
 }
+
+export async function deleteImageController(req, res, next) {
+  try {
+    const imageId = req.params.id;
+    const userId = req.user.id;
+
+    const deletedImage = await imageService.deleteImage(imageId, userId);
+
+    handleGenericSuccess(
+      res,
+      204,
+      deletedImage,
+      "Imagen eliminada correctamente!"
+    );
+  } catch (error) {
+    handleGenericError(
+      res,
+      400,
+      `Error al eliminar la imagen: ${error.message}`
+    );
+    next(error);
+  }
+}

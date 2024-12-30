@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createImageController,
   updateImageController,
+  deleteImageController,
 } from "../controllers/image.controller.js";
 import {
   createGalleryController,
@@ -87,6 +88,13 @@ router.put(
   validateSchemaParams(idSchema),
   validateSchema(updateGallerySchema),
   updateGalleryController
+);
+
+router.delete(
+  "/eliminar/imagen/:id",
+  authMiddleware,
+  validateSchemaParams(idSchema),
+  deleteImageController
 );
 
 export default router;
