@@ -1,4 +1,8 @@
-import { createGallery, updateGallery } from "../services/gallery.service.js";
+import {
+  createGallery,
+  updateGallery,
+  deleteGallery,
+} from "../services/gallery.service.js";
 import { handleGenericError } from "../utils/error.util.js";
 import { handleGenericSuccess } from "../utils/success.util.js";
 
@@ -45,6 +49,29 @@ export async function updateGalleryController(req, res, next) {
       res,
       400,
       `Error al actualizar galería: ${error.message}`
+    );
+    next(error);
+  }
+}
+
+export async function deleteGalleryController(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const idGallery = req.params.id;
+
+    const deletedGallery = await deleteGallery(idGallery, userId);
+
+    handleGenericSuccess(
+      res,
+      204,
+      deletedGallery,
+      "Galeria eliminada correctamente!"
+    );
+  } catch (error) {
+    handleGenericError(
+      res,
+      400,
+      `Error al eliminar galería: ${error.message}`
     );
     next(error);
   }

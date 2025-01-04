@@ -7,6 +7,7 @@ import {
 import {
   createGalleryController,
   updateGalleryController,
+  deleteGalleryController,
 } from "../controllers/galery.controller.js";
 import { updateUserController } from "../controllers/user.controller.js";
 import {
@@ -95,6 +96,13 @@ router.delete(
   authMiddleware,
   validateSchemaParams(idSchema),
   deleteImageController
+);
+
+router.delete(
+  "/eliminar/galeria/:id",
+  authMiddleware,
+  validateSchemaParams(idSchema),
+  deleteGalleryController
 );
 
 export default router;

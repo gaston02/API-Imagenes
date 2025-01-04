@@ -78,7 +78,10 @@ export async function updateGallery(idGallery, userId, galleryData) {
     let images = existingGallery.images; // Mantener las imágenes actuales por defecto
 
     if (galleryData.imageIds) {
-      if (Array.isArray(galleryData.imageIds) && galleryData.imageIds.length > 0) {
+      if (
+        Array.isArray(galleryData.imageIds) &&
+        galleryData.imageIds.length > 0
+      ) {
         // Validar las imágenes si se proporcionan nuevos IDs
         const validImages = await Image.find({
           _id: { $in: galleryData.imageIds },
@@ -100,7 +103,8 @@ export async function updateGallery(idGallery, userId, galleryData) {
 
     // Actualizar los campos de la galería
     existingGallery.name = galleryData.name || existingGallery.name;
-    existingGallery.description = galleryData.description || existingGallery.description;
+    existingGallery.description =
+      galleryData.description || existingGallery.description;
     existingGallery.public = galleryData.public ?? existingGallery.public;
     existingGallery.images = images;
 
@@ -128,3 +132,34 @@ export async function updateGallery(idGallery, userId, galleryData) {
   }
 }
 
+export async function deleteGallery(galleryId, userId) {
+  try {
+    const gallery = await Gallery.findById(galleryId);
+    if (!gallery) {
+      throw new Error("Galeria no encontrada.");
+    }
+
+    // Verificar que el usuario sea propietario de la galeria
+    if (gallery.user.toString() !== userId.toString()) {
+      throw new Error("No tienes permisos para eliminar esta galeria.");
+    }
+
+    // Eliminar imagenes asociadas
+    if (gallery.images && gallery.images.length > 0) {
+      await Image.updateMany(
+        { _id: { $in: gallery.images } },
+        { $pull: { galleries: galleryId } }
+      );
+    }
+
+    // Eliminar asociación con el usuario
+    await User.findByIdAndUpdate(userId, {
+      $pull: { galleries: galleryId },
+    });
+
+    const deletedGallery = await Gallery.findByIdAndDelete(galleryId);
+    return deletedGallery;
+  } catch (error) {
+    throw new Error(`Error al eliminar la galeria: ${error.message}`);
+  }
+}
