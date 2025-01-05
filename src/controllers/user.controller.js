@@ -35,6 +35,28 @@ export async function createUserController(req, res, next) {
   }
 }
 
+export async function getRandomUserController(req, res, next) {
+  try {
+    const user = await userService.getRandomUser();
+    if (!user) {
+      handleGenericError(res, 404, `No se encontró ningún usuario`);
+    }
+
+    handleGenericSuccess(res, 200, user, "Usuario random obtenido con exito!!");
+  } catch (error) {
+    if (error.message.includes("No se encontró ningún usuario")) {
+      handleGenericError(res, 404, `No se encontró ningún usuario`);
+    } else {
+      handleGenericError(
+        res,
+        400,
+        `Error al obtener un usuario random: ${error.message}`
+      );
+    }
+    next(error);
+  }
+}
+
 export async function updateUserController(req, res, next) {
   const id = req.params.id;
   const userData = req.body;

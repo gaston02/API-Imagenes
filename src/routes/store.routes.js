@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { createUserController } from "../controllers/user.controller.js";
+import {
+  createUserController,
+  getRandomUserController,
+} from "../controllers/user.controller.js";
 import { loginController, logout } from "../controllers/login.controller.js";
 import { profileImage } from "../middlewares/uploadImage.middleware.js";
 import { processImage } from "../middlewares/proccessImage.middleware.js";
@@ -26,6 +29,8 @@ router.post(
   ),
   createUserController
 );
+
+router.get("/usuario/aleatorio", getRandomUserController);
 
 router.post("/login", validateSchema(loginSchema), loginController);
 

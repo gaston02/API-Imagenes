@@ -54,19 +54,50 @@ export async function deleteDefaultProfileImage(idUser) {
 
 export async function getRandomUser() {
   try {
-    //obtener un arreglo de usuarios aleatorios (solo encontraremos 1, pero de todas formas se maneja como arreglo)
-    const randomUser = await User.aggregate([{ $sample: { size: 1 } }]);
+    // Obtener un usuario aleatorio con `aggregate`
+    const randomUserArray = await User.aggregate([
+      { $sample: { size: 1 } },
+      {
+        $project: {
+          _id: 1,
+          userName: 1,
+          images: 1,
+          galleries: 1
+        }
+      }
+    ]);
 
-    if (!randomUser || randomUser.length === 0) {
+    if (!randomUserArray || randomUserArray.length === 0) {
       throw new Error("No se encontró ningún usuario");
     }
 
-    // Retornar el usuario aleatorio (como es un array, obtenemos el primer elemento)
-    return randomUser[0];
+    const randomUserId = randomUserArray[0]._id;
+
+    const randomUser = await User.findById(randomUserId)
+      .select('nameUser images galleries')
+      .populate({
+        path: 'images',
+        select: 'path createdAt'
+      })
+      .populate({
+        path: 'galleries',
+        select: 'name createdAt images',
+        populate: {
+          path: 'images',
+          select: 'path'
+        }
+      });
+
+    if (!randomUser) {
+      throw new Error("No se encontraron detalles para el usuario seleccionado");
+    }
+
+    return randomUser;
   } catch (error) {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
 }
+
 
 export async function findUsers(pageNumber = 1, pageSize = 6) {
   try {
