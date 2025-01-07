@@ -63,10 +63,10 @@ router.post(
 router.put(
   "/actualizar/usuario/:id",
   authMiddleware,
+  validateSchemaParams(idSchema),
   checkUserOwnership,
   profileImage,
   processImage,
-  validateSchemaParams(idSchema),
   validateUserSchemaWithFileAndCleanupForUpdate(
     updateUserSchema,
     "processedImagePath",
