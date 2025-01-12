@@ -36,6 +36,4 @@ const imageSchema = new Schema(
   { timestamps: true }
 );
 
-imageSchema.index({ user: 1 });
-
 export default mongoose.model("Image", imageSchema);

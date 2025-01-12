@@ -36,6 +36,4 @@ const gallerySchema = new Schema(
   { timestamps: true }
 );
 
-gallerySchema.index({ user: 1 });
-
 export default mongoose.model("Gallery", gallerySchema);

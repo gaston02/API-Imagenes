@@ -7,18 +7,25 @@ import store from "./routes/store.routes.js";
 import profile from "./routes/profile.routes.js";
 import cron from "node-cron"; // Importa node-cron
 import { deleteUncompressedImages } from "./services/image.service.js"; // Asegúrate de importar la función
+import cors from "cors";
 
 const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());;
+//const uploads = path.join(__dirname, 'uploads');
+
+// Agregar console.log para verificar el middleware
+//console.log(`Serving static files from: ${uploads}`);
+
 
 // Define __dirname en ES module
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Servir la carpeta "uploads" de manera estática
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", store);
 app.use("/api", profile);
 
