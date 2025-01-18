@@ -14,7 +14,13 @@ const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());;
+const corsOptions = {
+  origin: 'http://localhost:5173', // Origen permitido
+  credentials: true, // Habilitar el envío de cookies y credenciales
+};
+
+//configurar cors
+app.use(cors(corsOptions));
 //const uploads = path.join(__dirname, 'uploads');
 
 // Agregar console.log para verificar el middleware
