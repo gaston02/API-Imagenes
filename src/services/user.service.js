@@ -62,9 +62,9 @@ export async function getRandomUser() {
           _id: 1,
           userName: 1,
           images: 1,
-          galleries: 1
-        }
-      }
+          galleries: 1,
+        },
+      },
     ]);
 
     if (!randomUserArray || randomUserArray.length === 0) {
@@ -74,22 +74,24 @@ export async function getRandomUser() {
     const randomUserId = randomUserArray[0]._id;
 
     const randomUser = await User.findById(randomUserId)
-      .select('nameUser images galleries')
+      .select("nameUser images galleries")
       .populate({
-        path: 'images',
-        select: 'path createdAt'
+        path: "images",
+        select: "path createdAt",
       })
       .populate({
-        path: 'galleries',
-        select: 'name createdAt images',
+        path: "galleries",
+        select: "name createdAt images",
         populate: {
-          path: 'images',
-          select: 'path'
-        }
+          path: "images",
+          select: "path",
+        },
       });
 
     if (!randomUser) {
-      throw new Error("No se encontraron detalles para el usuario seleccionado");
+      throw new Error(
+        "No se encontraron detalles para el usuario seleccionado"
+      );
     }
 
     return randomUser;
@@ -97,7 +99,6 @@ export async function getRandomUser() {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
 }
-
 
 export async function findUsers(pageNumber = 1, pageSize = 6) {
   try {
@@ -125,10 +126,40 @@ export async function findUser(emailUser) {
 export async function getUser(idUser) {
   try {
     const user = await User.findOne({ _id: idUser, status: true });
+
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
-    return user;
+
+    // Crear un nuevo objeto sin la contraseña
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    return userWithoutPassword;
+  } catch (error) {
+    throw new Error(`Error al obtener el usuario: ${error.message}`);
+  }
+}
+
+export async function publicGetUser(idUser) {
+  try {
+    const user = await User.findOne({ _id: idUser, status: true })
+      .populate({
+        path: "images",
+        match: { isPublic: true },
+      })
+      .populate({
+        path: "galleries",
+        match: { isPublic: true },
+      });
+
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Crear un nuevo objeto sin la contraseña
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    return userWithoutPassword;
   } catch (error) {
     throw new Error(`Error al obtener el usuario: ${error.message}`);
   }

@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createUserController,
   getRandomUserController,
+  getPublicUserController,
   getUserController,
 } from "../controllers/user.controller.js";
 import { loginController, logout } from "../controllers/login.controller.js";
@@ -47,7 +48,14 @@ router.get(
   getUserController
 );
 
-router.post("/login", validateSchema(loginSchema), loginController);
+router.get("/publico/usuario/:id", getPublicUserController);
+
+router.post(
+  "/login",
+  validateSchema(loginSchema),
+  validateSchemaParams(idSchema),
+  loginController
+);
 
 router.post("/logout", logout);
 
