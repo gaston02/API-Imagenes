@@ -20,6 +20,7 @@ import {
 import { loginSchema } from "../schemas/login.schema.js";
 import { createUserSchema } from "../schemas/user.schema.js";
 import { idSchema } from "../schemas/id.schema.js";
+import { nameUserSchema } from "../schemas/nameUser.schema.js";
 import { IMAGES_DIR } from "../config.js";
 
 const router = Router();
@@ -48,12 +49,15 @@ router.get(
   getUserController
 );
 
-router.get("/publico/usuario/:id", getPublicUserController);
+router.get(
+  "/publico/usuario/:nameUser",
+  validateSchemaParams(nameUserSchema),
+  getPublicUserController
+);
 
 router.post(
   "/login",
   validateSchema(loginSchema),
-  validateSchemaParams(idSchema),
   loginController
 );
 

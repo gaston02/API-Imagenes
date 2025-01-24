@@ -8,6 +8,10 @@ export const createUserSchema = z.object({
     })
     .refine((data) => data.trim() !== "", {
       message: "El nombre no puede estar vacío",
+    })
+    .refine((data) => /^[^. ]+(\.[^. ]+)?$/.test(data), {
+      message:
+        "El nombre no puede tener espacios, ni caracteres especiales",
     }),
   email: z
     .string({ required_error: "Email es requerido" })
@@ -75,6 +79,15 @@ export const updateUserSchema = z.object({
       {
         message:
           "El nombre no puede estar vacío, ni puede tener menos de 5 caracteres",
+      }
+    )
+    .refine(
+      (data) => {
+        if (data === undefined) return true;
+        return /^[^. ]+(\.[^. ]+)?$/.test(data);
+      },
+      {
+        message: "El nombre no puede tener espacios, ni caracteres especiales",
       }
     ),
   email: z

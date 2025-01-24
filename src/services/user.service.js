@@ -123,9 +123,9 @@ export async function findUser(emailUser) {
   }
 }
 
-export async function getUser(idUser) {
+export async function getUser(nameUser) {
   try {
-    const user = await User.findOne({ _id: idUser, status: true });
+    const user = await User.findOne({ nameUser: nameUser, status: true });
 
     if (!user) {
       throw new Error("Usuario no encontrado");
@@ -140,16 +140,16 @@ export async function getUser(idUser) {
   }
 }
 
-export async function publicGetUser(idUser) {
+export async function publicGetUser(nameUser) {
   try {
-    const user = await User.findOne({ _id: idUser, status: true })
+    const user = await User.findOne({ nameUser: nameUser, status: true })
       .populate({
         path: "images",
-        match: { isPublic: true },
+        match: { public: true },
       })
       .populate({
         path: "galleries",
-        match: { isPublic: true },
+        match: { public: true },
       });
 
     if (!user) {

@@ -82,8 +82,8 @@ export async function getUserController(req, res, next) {
 
 export async function getPublicUserController(req, res, next) {
   try {
-    const id = req.params.id;
-    const user = await userService.publicGetUser(id);
+    const nameUser = req.params.nameUser;
+    const user = await userService.publicGetUser(nameUser);
     if (!user) {
       handleGenericError(res, 404, `Usuario no encontrado`);
     }
