@@ -42,10 +42,9 @@ router.post(
 router.get("/usuario/aleatorio", getRandomUserController);
 
 router.get(
-  "/usuario/:id",
+  "/usuario/:nameUser",
   authMiddleware,
-  validateSchemaParams(idSchema),
-  checkUserOwnership,
+  validateSchemaParams(nameUserSchema),
   getUserController
 );
 

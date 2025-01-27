@@ -59,24 +59,24 @@ export async function getRandomUserController(req, res, next) {
 
 export async function getUserController(req, res, next) {
   try {
-    const id = req.params.id;
-    const user = await userService.getUser(id);
+    const nameUser = req.params.nameUser;
+    const user = await userService.getUser(nameUser);
+    
     if (!user) {
-      handleGenericError(res, 404, `Usuario no encontrado`);
+      return handleGenericError(res, 404, `Usuario no encontrado`); 
     }
 
-    handleGenericSuccess(res, 200, user, "Usuario obtenido con exito!!");
+    return handleGenericSuccess(res, 200, user, "Usuario obtenido con éxito!!"); 
   } catch (error) {
     if (error.message.includes("Usuario no encontrado")) {
-      handleGenericError(res, 404, `Usuario no encontrado`);
+      return handleGenericError(res, 404, `Usuario no encontrado`); 
     } else {
-      handleGenericError(
+      return handleGenericError(
         res,
         400,
         `Error al obtener un usuario random: ${error.message}`
-      );
+      ); 
     }
-    next(error);
   }
 }
 
