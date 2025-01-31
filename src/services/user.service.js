@@ -162,6 +162,8 @@ export async function publicGetUser(nameUser) {
       throw new Error("Usuario no encontrado");
     }
 
+    console.log("user: " + user);
+
     // Crear un nuevo objeto sin la contraseña
     const { password, ...userWithoutPassword } = user.toObject();
 

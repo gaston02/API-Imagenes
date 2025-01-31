@@ -36,10 +36,11 @@ export const validateSchemaWithFileAndCleanup =
     try {
       const data = {
         name: req.body.name,
-        public: req.body.public,
+        public: Boolean(req.body.public),
         galleryId: req.body.galleryId,
         path: req[fileKey], // Archivo procesado
       };
+      console.log(data);
 
       schema.parse(data);
 
