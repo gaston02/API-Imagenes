@@ -81,7 +81,6 @@ export async function deleteUncompressedImages() {
 
 export async function updateImage(imageId, userId, imageData) {
   try {
-    // Buscar la imagen existente
     const existingImage = await Image.findById(imageId);
     if (!existingImage) {
       throw new Error("Imagen no encontrada.");
@@ -96,10 +95,7 @@ export async function updateImage(imageId, userId, imageData) {
     let galleries = existingImage.galleries; // Mantener las galerías actuales por defecto
 
     if (imageData.galleryIds) {
-      if (
-        Array.isArray(imageData.galleryIds) &&
-        imageData.galleryIds.length > 0
-      ) {
+      if (Array.isArray(imageData.galleryIds) && imageData.galleryIds.length > 0) {
         // Validar las galerías si se proporcionan nuevos IDs
         const validGalleries = await Gallery.find({
           _id: { $in: imageData.galleryIds },
@@ -107,9 +103,7 @@ export async function updateImage(imageId, userId, imageData) {
         });
 
         if (validGalleries.length !== imageData.galleryIds.length) {
-          throw new Error(
-            "Algunas galerías no existen o no pertenecen al usuario."
-          );
+          throw new Error("Algunas galerías no existen o no pertenecen al usuario.");
         }
 
         galleries = validGalleries.map((gallery) => gallery._id); // Actualizar las galerías válidas
@@ -121,7 +115,7 @@ export async function updateImage(imageId, userId, imageData) {
 
     // Actualizar los campos de la imagen
     existingImage.name = imageData.name || existingImage.name;
-    existingImage.public = imageData.public ?? existingImage.public;
+    existingImage.public = imageData.public !== undefined ? imageData.public : existingImage.public; // Usamos '!== undefined' para asegurarnos de que no sea undefined
     existingImage.galleries = galleries;
 
     const updatedImage = await existingImage.save();
@@ -132,6 +126,7 @@ export async function updateImage(imageId, userId, imageData) {
       { $pull: { images: imageId } }
     );
 
+    // Añadir la imagen a las galerías nuevas
     if (galleries.length > 0) {
       await Promise.all(
         galleries.map((galleryId) =>
@@ -147,6 +142,7 @@ export async function updateImage(imageId, userId, imageData) {
     throw new Error(`Error al actualizar la imagen: ${error.message}`);
   }
 }
+
 
 export async function deleteImage(imageId, userId) {
   try {
