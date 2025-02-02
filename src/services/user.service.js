@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
+import mongoose from "mongoose";
 
 export async function createUser(userData) {
   try {
@@ -78,10 +79,12 @@ export async function getRandomUser() {
       .populate({
         path: "images",
         select: "path createdAt",
+        options: { limit: 6 },
       })
       .populate({
         path: "galleries",
         select: "name createdAt images",
+        options: { limit: 1 },
         populate: {
           path: "images",
           select: "path",
@@ -89,9 +92,7 @@ export async function getRandomUser() {
       });
 
     if (!randomUser) {
-      throw new Error(
-        "No se encontraron detalles para el usuario seleccionado"
-      );
+      throw new Error("No se encontraron detalles para el usuario seleccionado");
     }
 
     return randomUser;
@@ -99,6 +100,7 @@ export async function getRandomUser() {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
 }
+
 
 export async function findUsers(pageNumber = 1, pageSize = 6) {
   try {
@@ -162,8 +164,6 @@ export async function publicGetUser(nameUser) {
       throw new Error("Usuario no encontrado");
     }
 
-    console.log("user: " + user);
-
     // Crear un nuevo objeto sin la contraseña
     const { password, ...userWithoutPassword } = user.toObject();
 
@@ -175,19 +175,30 @@ export async function publicGetUser(nameUser) {
 
 export async function updateUser(id, userData) {
   try {
-    const existingUser = await this.getUser(id);
+    // Convertir id a ObjectId
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    const existingUser = await User.findOne({ _id: objectId });
     if (!existingUser) {
       throw new Error("Usuario no encontrado");
     }
-    const updateUser = await User.findOneAndUpdate(
-      { _id: id, status: true },
+
+    // Si userData.password existe, encriptarlo antes de actualizar
+    if (userData.password) {
+      userData.password = await bcrypt.hash(userData.password, 10);
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: objectId, status: true },
       { $set: userData },
       { new: true }
     );
-    if (!updateUser) {
+
+    if (!updatedUser) {
       throw new Error("No se pudo actualizar el usuario");
     }
-    return updateUser;
+
+    return updatedUser;
   } catch (error) {
     throw new Error(`Error al modificar el usuario: ${error.message}`);
   }

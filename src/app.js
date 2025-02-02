@@ -15,7 +15,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-  origin: 'http://localhost:5173', // Origen permitido
+  origin: "http://localhost:5173", // Origen permitido
   credentials: true, // Habilitar el envío de cookies y credenciales
 };
 
@@ -25,7 +25,6 @@ app.use(cors(corsOptions));
 
 // Agregar console.log para verificar el middleware
 //console.log(`Serving static files from: ${uploads}`);
-
 
 // Define __dirname en ES module
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

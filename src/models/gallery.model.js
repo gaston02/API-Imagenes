@@ -18,7 +18,6 @@ const gallerySchema = new Schema(
       {
         type: Schema.Types.ObjectId, 
         ref: "Image",
-        required: true,
       },
     ],
     public: {

@@ -3,8 +3,8 @@ import { z } from "zod";
 export const createGallerySchema = z.object({
   name: z
     .string({ required_error: "Nombre es requerido" })
-    .min(7, {
-      message: "El nombre debe tener al menos 7 caracteres",
+    .min(4, {
+      message: "El nombre debe tener al menos 4 caracteres",
     })
     .refine((data) => data.trim() !== "", {
       message: "El nombre no puede estar vacío",
