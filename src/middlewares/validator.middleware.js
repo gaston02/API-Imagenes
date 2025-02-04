@@ -5,7 +5,6 @@ export const validateSchema = (schema) => (req, res, next) => {
   try {
     // Convierte req.body.public a booleano y lo asigna de nuevo a req.body.public
     req.body.public = Boolean(req.body.public);
-    console.log("public back-end: " + req.body); // Verifica el valor de 'public'
 
     schema.parse(req.body);
 
