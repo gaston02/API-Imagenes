@@ -20,7 +20,7 @@ export const createGallerySchema = z.object({
         return true;
       },
       {
-        message: "La informacion del usuario no puede estar vacia",
+        message: "La descripcion no puede estar vacia",
       }
     ),
   public: z.boolean().default(true),

@@ -143,7 +143,6 @@ export async function updateImage(imageId, userId, imageData) {
   }
 }
 
-
 export async function deleteImage(imageId, userId) {
   try {
     const image = await Image.findById(imageId);
