@@ -3,7 +3,7 @@ import Image from "../models/image.model.js";
 import User from "../models/user.model.js";
 
 export async function createGallery(galleryData, imageIds = []) {
-  const { userId, name, description } = galleryData;
+  const { userId, name, description, public: isPublic } = galleryData; // Extraer public
 
   let validImages = [];
 
@@ -21,13 +21,16 @@ export async function createGallery(galleryData, imageIds = []) {
     }
   }
 
-  // Crear la galería con o sin imágenes
+  // Crear la galería con o sin imágenes, ahora incluyendo el campo `public`
   const newGallery = await Gallery.create({
     name,
     description,
+    public: isPublic, // Asegurar que el valor se almacene correctamente
     user: userId,
     images: validImages.map((image) => image._id), // Si no hay imágenes, será un array vacío
   });
+
+  console.log("Valor de public en la nueva galería:", newGallery.public);
 
   if (validImages.length > 0) {
     // Actualizar las imágenes con la referencia a la nueva galería
@@ -58,6 +61,7 @@ export async function createGallery(galleryData, imageIds = []) {
 
   return newGallery;
 }
+
 
 export async function updateGallery(idGallery, userId, galleryData) {
   try {
