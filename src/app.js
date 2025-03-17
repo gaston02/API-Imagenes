@@ -15,7 +15,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-  origin: "https://picvaul.com/", // Origen permitido
+  origin: "https://picvaul.com", // Origen permitido
   credentials: true, // Habilitar el envío de cookies y credenciales
 };
 
