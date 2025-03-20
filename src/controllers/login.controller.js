@@ -21,22 +21,26 @@ export async function loginController(req, res, next) {
       );
     }
 
-    // Espera el token
+    // Genera el token
     const token = await createToken({ id: user._id });
-    res.cookie("token", token, { httpOnly: true }); // Agrega opciones como httpOnly por seguridad
 
-    // Incluye el token en la respuesta
-    handleGenericSuccess(
-      res,
-      200,
-      { ...user._doc, token }, // Incluye el token aquí
-      "Usuario logeado correctamente!!"
-    );
+    // Configuración de la cookie para que funcione en producción
+    res.cookie("token", token, {
+      httpOnly: true,  // 🔒 Protege la cookie para que solo el servidor pueda accederla
+      secure: true,    // 🔥 Necesario si el sitio usa HTTPS (activar solo en producción)
+      sameSite: "None", // 🔥 Requerido para peticiones entre distintos dominios
+    });
+
+    // Devuelve el usuario sin incluir la contraseña
+    const { password: _, ...userData } = user._doc;
+
+    handleGenericSuccess(res, 200, { ...userData, token }, "Usuario logeado correctamente!!");
   } catch (error) {
     handleGenericError(res, 500, `Error al hacer el login: ${error.message}`);
     next(error);
   }
 }
+
 
 export async function logout(req, res) {
   try {
