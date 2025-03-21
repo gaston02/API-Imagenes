@@ -6,57 +6,58 @@ import { fileURLToPath } from "url";
 import store from "./routes/store.routes.js";
 import profile from "./routes/profile.routes.js";
 import cron from "node-cron"; // Importa node-cron
-import { deleteUncompressedImages } from "./services/image.service.js"; // Asegúrate de importar la función
+import { deleteUncompressedImages } from "./services/image.service.js"; // Importa la función
 import cors from "cors";
 
 const app = express();
 
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(cookieParser());
-const corsOptions = {
-  origin: ["https://picvaul.com", "http://localhost:5173"], // Origen permitido
-  credentials: true, // Habilitar el envío de cookies y credenciales
-};
+// 1. Middlewares básicos
+app.use(morgan("dev")); // Logs de solicitudes
+app.use(express.json()); // Parsear JSON en las solicitudes
+app.use(cookieParser()); // Manejar cookies
 
-//configurar cors
-app.use(cors(corsOptions));
-//const uploads = path.join(__dirname, 'uploads');
+// 2. Configuración de CORS
+app.use(
+  cors({
+    origin: "https://picvaul.com", // Solo permite tu dominio de producción
+    credentials: true, // Permite enviar cookies
+  })
+);
 
-// Agregar console.log para verificar el middleware
-//console.log(`Serving static files from: ${uploads}`);
-
-// Define __dirname en ES module
+// 3. Servir archivos estáticos
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Servir la carpeta "uploads" de manera estática
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// 4. Rutas
 app.use("/api", store);
 app.use("/api", profile);
 
-// Programar la tarea para eliminar imágenes no comprimidas cada 24 horas
+// 5. Tarea programada para eliminar imágenes no comprimidas
 cron.schedule("0 0 * * *", async () => {
   // Se ejecutará todos los días a la medianoche
   try {
     await deleteUncompressedImages();
-    console.log("Eliminación de imágenes no comprimidas ejecutada.");
+    console.log("[CRON] Eliminación de imágenes no comprimidas ejecutada.");
   } catch (error) {
-    throw new Error(
-      `Error al ejecutar la tarea de eliminacion de imagenes: ${error.message}`
-    );
+    console.error("[CRON ERROR]", error.message);
   }
 });
 
-// Ejecutar la tarea inmediatamente al iniciar la aplicación
+// 6. Ejecutar la tarea inmediatamente al iniciar la aplicación
 (async () => {
   try {
     await deleteUncompressedImages();
-    console.log("Eliminación de imágenes no comprimidas inicial ejecutada.");
-  } catch (error) {
-    throw new Error(
-      `Error al ejecutar la eliminacion inicial de imagenes: ${error.message}`
+    console.log(
+      "[INIT] Eliminación de imágenes no comprimidas inicial ejecutada."
     );
+  } catch (error) {
+    console.error("[INIT ERROR]", error.message);
   }
 })();
+
+// 7. Endpoint de salud
+app.get("/status", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date() });
+});
 
 export default app;

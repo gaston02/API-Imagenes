@@ -24,23 +24,29 @@ export async function loginController(req, res, next) {
     // Genera el token
     const token = await createToken({ id: user._id });
 
-    // Configuración de la cookie para que funcione en producción
+    // Configuración de la cookie (1 semana de duración)
     res.cookie("token", token, {
-      httpOnly: true,  // 🔒 Protege la cookie para que solo el servidor pueda accederla
-      secure: true,    // 🔥 Necesario si el sitio usa HTTPS (activar solo en producción)
-      sameSite: "None", // 🔥 Requerido para peticiones entre distintos dominios
+      httpOnly: true, // Bloquea acceso desde JS
+      secure: true, // Solo HTTPS
+      sameSite: "None", // Cross-origin
+      domain: "imageshub-api.ddns.net", // Dominio del backend
+      path: "/", // Válida en todas las rutas
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 604,800,000 ms = 1 semana
     });
 
-    // Devuelve el usuario sin incluir la contraseña
-    const { password: _, ...userData } = user._doc;
+    // Datos seguros del usuario
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    };
 
-    handleGenericSuccess(res, 200, { ...userData }, "Usuario logeado correctamente!!");
+    handleGenericSuccess(res, 200, userData, "Login exitoso");
   } catch (error) {
     handleGenericError(res, 500, `Error al hacer el login: ${error.message}`);
     next(error);
   }
 }
-
 
 export async function logout(req, res) {
   try {
