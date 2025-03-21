@@ -34,7 +34,7 @@ export async function loginController(req, res, next) {
     // Devuelve el usuario sin incluir la contraseña
     const { password: _, ...userData } = user._doc;
 
-    handleGenericSuccess(res, 200, { ...userData, token }, "Usuario logeado correctamente!!");
+    handleGenericSuccess(res, 200, { ...userData }, "Usuario logeado correctamente!!");
   } catch (error) {
     handleGenericError(res, 500, `Error al hacer el login: ${error.message}`);
     next(error);
