@@ -61,21 +61,32 @@ export async function getUserController(req, res, next) {
   try {
     const nameUser = req.params.nameUser;
     const user = await userService.getUser(nameUser);
-    
+
     if (!user) {
-      return handleGenericError(res, 404, `Usuario no encontrado`); 
+      return handleGenericError(res, 404, `Usuario no encontrado`);
     }
 
-    return handleGenericSuccess(res, 200, user, "Usuario obtenido con éxito!!"); 
+    // 3. Filtrar datos sensibles
+    const safeUserData = {
+      id: user._id,
+      nameUser: user.nameUser,
+      email: user.email,
+      profileImage: user.profileImage,
+      userInfo: user.userInfo,
+      galleries: user.galleries,
+      images: user.images,
+    };
+
+    return handleGenericSuccess(res, 200, safeUserData, "Usuario obtenido con éxito!!");
   } catch (error) {
     if (error.message.includes("Usuario no encontrado")) {
-      return handleGenericError(res, 404, `Usuario no encontrado`); 
+      return handleGenericError(res, 404, `Usuario no encontrado`);
     } else {
       return handleGenericError(
         res,
         400,
         `Error al obtener un usuario random: ${error.message}`
-      ); 
+      );
     }
   }
 }
