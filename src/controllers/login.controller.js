@@ -36,7 +36,7 @@ export async function loginController(req, res, next) {
 
     // Datos seguros del usuario
     const userData = {
-      id: user._id,
+      _id: user._id,
       nameUser: user.nameUser,
       email: user.email,
       profileImage: user.profileImage,

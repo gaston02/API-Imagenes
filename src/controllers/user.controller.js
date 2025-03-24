@@ -69,7 +69,7 @@ export async function getUserController(req, res, next) {
     // 3. Filtrar datos sensibles
     const safeUserData = {
       id: user._id,
-      name: user.nameUser,
+      nameUser: user.nameUser,
       email: user.email,
       profileImage: user.profileImage,
       userInfo: user.userInfo,
