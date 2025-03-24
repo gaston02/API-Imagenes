@@ -24,16 +24,6 @@ app.use(
   })
 );
 
-// Configuración de la cookie (1 semana de duración)
-res.cookie("token", token, {
-  httpOnly: true, // Bloquea acceso desde JS
-  secure: true, // Solo HTTPS
-  sameSite: "None", // Cross-origin
-  domain: "imageshub-api.ddns.net", // Dominio del backend
-  path: "/", // Válida en todas las rutas
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 604,800,000 ms = 1 semana
-});
-
 // 3. Servir archivos estáticos
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
