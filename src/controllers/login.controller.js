@@ -24,12 +24,14 @@ export async function loginController(req, res, next) {
     // Genera el token
     const token = await createToken({ id: user._id });
 
+    // Configuración de la cookie (1 semana de duración)
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true, // Bloquea acceso desde JS
+      secure: true, // Solo HTTPS
+      sameSite: "None", // Cross-origin
+      domain: "imageshub-api.ddns.net", // Dominio del backend
+      path: "/", // Válida en todas las rutas
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 604,800,000 ms = 1 semana
     });
 
     // Datos seguros del usuario
