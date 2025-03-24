@@ -37,8 +37,12 @@ export async function loginController(req, res, next) {
     // Datos seguros del usuario
     const userData = {
       _id: user._id,
-      name: user.name,
+      name: user.nameUser,
       email: user.email,
+      profileImage: user.profileImage,
+      userInfo: user.userInfo,
+      galleries: user.galleries,
+      images: user.images,
     };
 
     handleGenericSuccess(res, 200, userData, "Login exitoso");
