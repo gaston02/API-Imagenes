@@ -24,9 +24,10 @@ app.use(
   })
 );
 
-// 3. Servir archivos estáticos
+// app.js (ubicado en /API-Imagenes/src/)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"))); // 👈 Usa ".." para subir un nivel
 
 // 4. Rutas
 app.use("/api", store);
