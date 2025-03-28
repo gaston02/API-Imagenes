@@ -25,10 +25,10 @@ app.use(
   })
 );
 
-// app.js (ubicado en /API-Imagenes/src/)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads"))); // 👈 Usa ".." para subir un nivel
+// Configuración CORRECTA para apuntar a /API-Imagenes/src/uploads/
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // 4. Rutas
 app.use("/api", store);

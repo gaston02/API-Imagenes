@@ -1,10 +1,14 @@
 import multer from "multer";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Obtener ruta absoluta del directorio actual (src/)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./src/uploads"); // Carpeta donde se guardarán las imágenes
+    cb(null, path.join(__dirname, "uploads")); // Ruta absoluta: /API-Imagenes/src/uploads/
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
