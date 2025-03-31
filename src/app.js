@@ -19,7 +19,7 @@ app.use(cookieParser()); // Manejar cookies
 // 2. Configuración de CORS
 app.use(
   cors({
-    origin: "https://picvaul.com", // Tu dominio frontend
+    origin: ["https://picvaul.com", "http://localhost:5173/"], // Tu dominio frontend
     credentials: true, // Permite cookies
     allowedHeaders: ["Content-Type", "Authorization"],
   })
