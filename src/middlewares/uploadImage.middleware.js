@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "uploads")); // Ruta absoluta: /API-Imagenes/src/uploads/
+    cb(null, path.join(__dirname, "..", "uploads")); // Ruta absoluta: /API-Imagenes/src/uploads/
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

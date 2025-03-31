@@ -1,5 +1,5 @@
+import fs from "fs/promises";
 import path from "path";
-import fs from "fs";
 
 export const validateSchema = (schema) => (req, res, next) => {
   try {
@@ -36,7 +36,7 @@ export const validateSchemaParams = (schema) => (req, res, next) => {
 };
 
 export const validateSchemaWithFileAndCleanup =
-  (schema, fileKey, uploadDir) => (req, res, next) => {
+  (schema, fileKey, uploadDir) => async (req, res, next) => {
     try {
       const data = {
         name: req.body.name,
@@ -44,29 +44,30 @@ export const validateSchemaWithFileAndCleanup =
         galleryId: req.body.galleryId,
         path: req[fileKey], // Archivo procesado
       };
-      console.log(data);
 
       schema.parse(data);
 
       next();
     } catch (error) {
-      // Limpiar el archivo en caso de error
-      const filePath = path.join(uploadDir, req[fileKey]);
-      fs.unlink(filePath, (unlinkError) => {
-        if (unlinkError) {
-          if (unlinkError.code === "ENOENT") {
-            console.log("El archivo ya no existe, nada que eliminar.");
-          } else {
-            console.error(
-              `Error al eliminar la imagen: ${unlinkError.message}`
-            );
-          }
-        } else {
-          console.log("Imagen inválida eliminada correctamente.");
-        }
-      });
+      try {
+        // Construir la ruta completa del archivo
+        const filePath = path.join(uploadDir, req[fileKey]);
 
-      // Devolver el error al cliente
+        // Verificar si el archivo existe antes de eliminarlo
+        await fs.access(filePath); // Si no existe, lanzará un error
+
+        // Eliminar el archivo
+        await fs.unlink(filePath);
+        console.log("Imagen inválida eliminada correctamente.");
+      } catch (unlinkError) {
+        if (unlinkError.code === "ENOENT") {
+          console.log("El archivo ya no existe, nada que eliminar.");
+        } else {
+          console.error(`Error al eliminar la imagen: ${unlinkError.message}`);
+        }
+      }
+
+      // Devolver el error de validación al cliente
       const errorMessage = error.errors?.[0]?.message || "Error de validación";
       return res.status(400).json({ error: errorMessage });
     }
