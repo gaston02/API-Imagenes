@@ -17,6 +17,8 @@ const storage = multer.diskStorage({
   },
 });
 
+console.log("storage: " + JSON.stringify(storage));
+
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
