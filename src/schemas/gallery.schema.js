@@ -32,10 +32,10 @@ export const updateGallerySchema = z.object({
     .optional()
     .refine(
       (data) =>
-        data === undefined || (data.trim() !== "" && data.trim().length >= 7),
+        data === undefined || (data.trim() !== "" && data.trim().length >= 4),
       {
         message:
-          "El nombre no puede estar vacío, ni puede tener menos de 7 caracteres",
+          "El nombre no puede estar vacío, ni puede tener menos de 4 caracteres",
       }
     ),
   description: z
