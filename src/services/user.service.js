@@ -64,6 +64,7 @@ export async function getRandomUser() {
           userName: 1,
           images: 1,
           galleries: 1,
+          public: 1,
         },
       },
     ]);
