@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
+import Gallery from "../models/gallery.model.js";
 import mongoose from "mongoose";
 
 export async function createUser(userData) {
@@ -55,7 +56,7 @@ export async function deleteDefaultProfileImage(idUser) {
 
 export async function getRandomUser() {
   try {
-    // Obtener un usuario aleatorio con aggregate
+    // Obtener un usuario aleatorio
     const randomUserArray = await User.aggregate([
       { $sample: { size: 1 } },
       {
@@ -79,31 +80,38 @@ export async function getRandomUser() {
       .select("nameUser images galleries")
       .populate({
         path: "images",
-        select: "path createdAt pulbic",
+        select: "path createdAt public",
         options: { limit: 6 },
         match: { public: true },
-      })
-      .populate({
-        path: "galleries",
-        select: "name createdAt images public",
-        options: { limit: 1 },
-        populate: {
-          path: "images",
-          select: "path",
-          match: { public: true },
-        },
       });
 
     if (!randomUser) {
       throw new Error("No se encontraron detalles para el usuario seleccionado");
     }
 
-    return randomUser;
+    // Obtener manualmente la primera galería pública del array
+    const publicGallery = await Gallery.findOne({
+      _id: { $in: randomUser.galleries },
+      public: true,
+    })
+      .select("name createdAt images public")
+      .populate({
+        path: "images",
+        select: "path",
+        match: { public: true },
+      });
+
+    // Ensamblar el objeto final manualmente
+    const userWithPublicGallery = {
+      ...randomUser.toObject(),
+      galleries: publicGallery ? [publicGallery] : [],
+    };
+
+    return userWithPublicGallery;
   } catch (error) {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
 }
-
 
 
 export async function findUsers(pageNumber = 1, pageSize = 6) {
