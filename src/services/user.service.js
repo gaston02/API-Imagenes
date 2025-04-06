@@ -79,13 +79,13 @@ export async function getRandomUser() {
       .select("nameUser images galleries")
       .populate({
         path: "images",
-        select: "path createdAt",
+        select: "path createdAt pulbic",
         options: { limit: 6 },
         match: { public: true },
       })
       .populate({
         path: "galleries",
-        select: "name createdAt images",
+        select: "name createdAt images public",
         options: { limit: 1 },
         populate: {
           path: "images",
