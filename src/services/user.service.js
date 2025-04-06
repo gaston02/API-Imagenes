@@ -61,7 +61,7 @@ export async function getRandomUser() {
       {
         $project: {
           _id: 1,
-          userName: 1,
+          nameUser: 1,
           images: 1,
           galleries: 1,
           public: 1,
