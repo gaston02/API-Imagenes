@@ -55,13 +55,13 @@ export async function deleteDefaultProfileImage(idUser) {
 
 export async function getRandomUser() {
   try {
-    // Obtener un usuario aleatorio
+    // Obtener un usuario aleatorio con aggregate
     const randomUserArray = await User.aggregate([
       { $sample: { size: 1 } },
       {
         $project: {
           _id: 1,
-          nameUser: 1,
+          userName: 1,
           images: 1,
           galleries: 1,
           public: 1,
@@ -69,38 +69,36 @@ export async function getRandomUser() {
       },
     ]);
 
+    if (!randomUserArray || randomUserArray.length === 0) {
+      throw new Error("No se encontró ningún usuario");
+    }
+
+    const randomUserId = randomUserArray[0]._id;
+
     const randomUser = await User.findById(randomUserId)
       .select("nameUser images galleries")
       .populate({
         path: "images",
-        select: "path createdAt public",
+        select: "path createdAt pulbic",
         options: { limit: 6 },
         match: { public: true },
+      })
+      .populate({
+        path: "galleries",
+        select: "name createdAt images public",
+        options: { limit: 1 },
+        populate: {
+          path: "images",
+          select: "path",
+          match: { public: true },
+        },
       });
 
     if (!randomUser) {
       throw new Error("No se encontraron detalles para el usuario seleccionado");
     }
 
-    // Obtener solo la primera galería pública (si existe)
-    const publicGallery = await Gallery.findOne({
-      _id: { $in: randomUser.galleries },
-      public: true,
-    })
-      .select("name createdAt images public")
-      .populate({
-        path: "images",
-        select: "path",
-        match: { public: true },
-      });
-
-    // Adjuntar la galería pública al usuario manualmente
-    const userWithGallery = {
-      ...randomUser.toObject(),
-      galleries: publicGallery ? [publicGallery] : [],
-    };
-
-    return userWithGallery;
+    return randomUser;
   } catch (error) {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
