@@ -133,11 +133,9 @@ export async function getUser(nameUser) {
     const user = await User.findOne({ nameUser: nameUser, status: true })
       .populate({
         path: "images",
-        match: { public: true },
       })
       .populate({
         path: "galleries",
-        match: { public: true },
       });
 
     if (!user) {
