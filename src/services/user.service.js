@@ -80,6 +80,7 @@ export async function getRandomUser() {
         path: "images",
         select: "path createdAt",
         options: { limit: 6 },
+        match: { public: true },
       })
       .populate({
         path: "galleries",
@@ -88,6 +89,7 @@ export async function getRandomUser() {
         populate: {
           path: "images",
           select: "path",
+          match: { public: true },
         },
       });
 
