@@ -69,12 +69,6 @@ export async function getRandomUser() {
       },
     ]);
 
-    if (!randomUserArray || randomUserArray.length === 0) {
-      throw new Error("No se encontró ningún usuario");
-    }
-
-    const randomUserId = randomUserArray[0]._id;
-
     const randomUser = await User.findById(randomUserId)
       .select("nameUser images galleries")
       .populate({
