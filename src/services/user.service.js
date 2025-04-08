@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import Gallery from "../models/gallery.model.js";
-import mongoose from "mongoose";
+import { generateResetToken } from "../utils/tokenPassword.util.js";
 
 export async function createUser(userData) {
   try {
@@ -86,7 +87,9 @@ export async function getRandomUser() {
       });
 
     if (!randomUser) {
-      throw new Error("No se encontraron detalles para el usuario seleccionado");
+      throw new Error(
+        "No se encontraron detalles para el usuario seleccionado"
+      );
     }
 
     // Obtener manualmente la primera galería pública del array
@@ -112,7 +115,6 @@ export async function getRandomUser() {
     throw new Error(`Error al encontrar un usuario: ${error.message}`);
   }
 }
-
 
 export async function findUsers(pageNumber = 1, pageSize = 6) {
   try {
@@ -290,5 +292,24 @@ export async function returnUserDelete(emailUser) {
     return userDelete;
   } catch (error) {
     throw new Error(`Error al retornar al usuario eliminado: ${error.message}`);
+  }
+}
+
+export async function requestPasswordReset(email) {
+  try {
+    const user = await this.findUser(email);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+    const { token, tokenHash, expires } = await generateResetToken();
+    user.resetTokenPassword = tokenHash;
+    user.resetTokenExpires = new Date(expires);
+    await user.save();
+    return {
+      email: user.email,
+      token
+    }
+  } catch (error) {
+    throw new Error(`Error al generar token de reseteo: ${error.message}`);
   }
 }
