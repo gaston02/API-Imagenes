@@ -9,15 +9,17 @@ export const processImage = async (req, res, next) => {
     }
 
     const inputPath = req.file.path;
+    // Obtener el directorio del archivo original
+    const outputDir = path.dirname(inputPath);
+    // Definir un nuevo nombre para la imagen procesada
+    const outputFileName = `compressed-${path.basename(inputPath)}`;
+    // Construir el path completo para la imagen procesada
+    const outputPath = path.join(outputDir, outputFileName);
 
-    // Crear un nuevo outputPath
-    const outputDir = path.dirname(inputPath); // Obtener el directorio del archivo original
-    const outputFileName = `compressed-${path.basename(inputPath)}`; // Cambiar el nombre del archivo
-    const outputPath = path.join(outputDir, outputFileName); // Construir el nuevo path
+    // Comprimir la imagen usando la función de utilidad
+    await compressImage(inputPath, outputPath);
 
-    await compressImage(inputPath, outputPath); // Comprimir la imagen
-
-    // Guardar solo el nombre del archivo procesado en req.processedImagePath
+    // Guardar el nombre del archivo procesado en req para su uso posterior
     req.processedImagePath = outputFileName;
 
     next();
