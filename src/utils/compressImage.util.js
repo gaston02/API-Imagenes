@@ -4,31 +4,44 @@ import fs from "fs/promises";
 export const compressImage = async (
   inputPath,
   outputPath,
-  maxWidth = 800,
-  quality = 80,
-  effort = 6
+  {
+    maxWidth = 800,
+    quality = 80,
+    effort = 6,
+    format = "webp",
+    failOnError = false,
+  } = {}
 ) => {
   try {
     await fs.access(inputPath);
 
-    // Procesa la imagen:
-    // 1. .rotate() corrige la orientación según los metadatos EXIF.
-    // 2. .resize() ajusta el tamaño sin ampliar imágenes pequeñas.
-    // 3. .removeMetadata() elimina los metadatos EXIF problemáticos.
-    // 4. .webp() convierte la imagen a formato WebP con la calidad y esfuerzo indicados.
-    await sharp(inputPath)
+    const processor = sharp(inputPath, { failOnError })
       .rotate()
       .resize({
         width: maxWidth,
         withoutEnlargement: true,
+        fit: "inside",
       })
-      .removeMetadata()
-      .webp({
-        quality,
-        effort,
-      })
-      .toFile(outputPath);
+      .toColourspace("srgb")
+      .removeMetadata();
+
+    // Configurar formato de salida
+    switch (format.toLowerCase()) {
+      case "jpeg":
+      case "jpg":
+        processor.jpeg({ quality, mozjpeg: true });
+        break;
+      case "png":
+        processor.png({ compressionLevel: 9 });
+        break;
+      case "webp":
+      default:
+        processor.webp({ quality, effort });
+    }
+
+    await processor.toFile(outputPath);
   } catch (error) {
+    console.error("Error details:", error); // Mejor logging
     throw new Error(`Error al procesar la imagen: ${error.message}`);
   }
 };
