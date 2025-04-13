@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import fs from "fs/promises";
 
-export const processAndroidImage = async (
+export const compressImage = async (
   inputPath,
   outputPath,
   {

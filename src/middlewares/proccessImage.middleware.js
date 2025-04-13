@@ -5,7 +5,7 @@ export const processImage = async (req, res, next) => {
   try {
     // Si no se recibe un archivo, simplemente continuar sin hacer nada
     if (!req.file) {
-      return next(); // Continuar con la siguiente etapa en la cadena de middlewares
+      return next();
     }
 
     const inputPath = req.file.path;
@@ -20,7 +20,7 @@ export const processImage = async (req, res, next) => {
     // Guardar solo el nombre del archivo procesado en req.processedImagePath
     req.processedImagePath = outputFileName;
 
-    next(); // Continuar con el siguiente middleware
+    next();
   } catch (error) {
     next(error);
   }
