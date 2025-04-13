@@ -20,8 +20,6 @@ export const processImage = async (req, res, next) => {
     // Guardar solo el nombre del archivo procesado en req.processedImagePath
     req.processedImagePath = outputFileName;
 
-    console.log("cruza los dedos: " + req.processedImagePath);
-
     next(); // Continuar con el siguiente middleware
   } catch (error) {
     next(error);
