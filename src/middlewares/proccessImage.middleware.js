@@ -1,27 +1,35 @@
-import path from "path";
-import { compressImage } from "../utils/compressImage.util.js";
+import sharp from "sharp";
+import fs from "fs/promises";
 
-export const processImage = async (req, res, next) => {
+export const compressImage = async (
+  inputPath,
+  outputPath,
+  maxWidth = 800,
+  quality = 80,
+  effort = 6
+) => {
   try {
-    // Si no se recibe un archivo, simplemente continuar sin hacer nada
-    if (!req.file) {
-      return next();
-    }
+    // Verificar que el archivo de entrada exista
+    await fs.access(inputPath);
 
-    const inputPath = req.file.path;
-
-    // Crear un nuevo outputPath
-    const outputDir = path.dirname(inputPath); // Obtener el directorio del archivo original
-    const outputFileName = `compressed-${path.basename(inputPath)}`; // Cambiar el nombre del archivo
-    const outputPath = path.join(outputDir, outputFileName); // Construir el nuevo path
-
-    await compressImage(inputPath, outputPath); // Comprimir la imagen
-
-    // Guardar solo el nombre del archivo procesado en req.processedImagePath
-    req.processedImagePath = outputFileName;
-
-    next();
+    // Procesar la imagen:
+    // 1. .rotate() corrige la orientación según los metadatos EXIF.
+    // 2. .resize() redimensiona la imagen sin ampliarla si es menor.
+    // 3. .removeMetadata() elimina los metadatos que puedan causar problemas.
+    // 4. .webp() convierte la imagen a formato WebP con la calidad y esfuerzo indicados.
+    await sharp(inputPath)
+      .rotate()
+      .resize({
+        width: maxWidth,
+        withoutEnlargement: true,
+      })
+      .removeMetadata()
+      .webp({
+        quality,
+        effort,
+      })
+      .toFile(outputPath);
   } catch (error) {
-    next(error);
+    throw new Error(`Error al procesar la imagen: ${error.message}`);
   }
 };
