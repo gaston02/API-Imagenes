@@ -9,26 +9,21 @@ export const compressImage = async (
   effort = 6
 ) => {
   try {
-    // Verifica que el archivo de entrada exista
+    // Verificar que el archivo de entrada exista
     await fs.access(inputPath);
 
-    // Procesa la imagen:
-    // 1. .rotate() corrige la orientación según los metadatos EXIF.
-    // 2. .resize() ajusta el tamaño sin ampliar imágenes pequeñas.
-    // 3. .removeMetadata() elimina los metadatos EXIF problemáticos.
-    // 4. .webp() convierte la imagen a formato WebP con la calidad y esfuerzo indicados.
+    // Comprimir la imagen utilizando sharp y WebP
     await sharp(inputPath)
-      .rotate()
       .resize({
-        width: maxWidth,
-        withoutEnlargement: true,
+        width: maxWidth, // Redimensionar con un ancho máximo configurable
+        withoutEnlargement: true, // Evitar agrandar imágenes más pequeñas
       })
-      .removeMetadata()
       .webp({
-        quality,
-        effort,
+        quality, // Ajustar la calidad según el parámetro
+        effort, // Nivel de esfuerzo de compresión (1 más rápido, 6 mayor compresión)
       })
       .toFile(outputPath);
+
   } catch (error) {
     throw new Error(`Error al procesar la imagen: ${error.message}`);
   }
