@@ -1,47 +1,76 @@
 import sharp from "sharp";
 import fs from "fs/promises";
 
-export const compressImage = async (
+export const processAndroidImage = async (
   inputPath,
   outputPath,
   {
     maxWidth = 800,
     quality = 80,
     effort = 6,
-    format = "webp", // Nuevo parámetro para formato
+    format = "webp",
     failOnError = false,
+    chromaSubsampling = "4:4:4",
+    compressionLevel = 9,
   } = {}
 ) => {
   try {
-    await fs.access(inputPath);
+    const inputBuffer = await fs.readFile(inputPath);
 
-    const processor = sharp(inputPath, { failOnError })
+    const pipeline = sharp(inputBuffer, {
+      failOnError,
+      sequentialRead: true,
+    });
+
+    // Procesamiento principal
+    pipeline
       .rotate()
       .resize({
         width: maxWidth,
         withoutEnlargement: true,
         fit: "inside",
+        kernel: sharp.kernel.lanczos3,
       })
-      .toColourspace("srgb")
-      .removeMetadata();
+      .flatten({ background: "#ffffff" })
+      .normalise()
+      .linear(1.1)
+      .sharpen({ sigma: 0.5, m1: 0, m2: 3, x1: 3, y2: 15, y3: 15 });
 
-    // Configurar formato de salida
+    // Configuración de formato
     switch (format.toLowerCase()) {
       case "jpeg":
       case "jpg":
-        processor.jpeg({ quality, mozjpeg: true });
+        pipeline.jpeg({
+          quality,
+          mozjpeg: true,
+          chromaSubsampling,
+        });
         break;
+
       case "png":
-        processor.png({ compressionLevel: 9 });
+        pipeline.png({
+          compressionLevel,
+          adaptiveFiltering: true,
+        });
         break;
+
       case "webp":
       default:
-        processor.webp({ quality, effort });
+        pipeline.webp({
+          quality,
+          effort,
+          smartSubsample: true,
+        });
     }
 
-    await processor.toFile(outputPath);
+    await pipeline.toFile(outputPath);
+    console.log("Procesamiento exitoso");
   } catch (error) {
-    console.error("Error details:", error); // Mejor logging
-    throw new Error(`Error al procesar la imagen: ${error.message}`);
+    console.error("Error detallado:", {
+      inputPath,
+      errorCode: error.code,
+      params: { maxWidth, quality, effort, format }, // Registramos los parámetros usados
+    });
+    throw new Error(`Error procesando imagen: ${error.message}`);
   }
 };
