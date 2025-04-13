@@ -25,6 +25,7 @@ import {
   validateSchemaParams,
   validateUserSchemaWithFileAndCleanupForUpdate,
 } from "../middlewares/validator.middleware.js";
+import { convertHeicHeifMiddleware } from "../middlewares/preProcessImage.middleware.js";
 import {
   createImageSchema,
   updateImageSchema,
@@ -44,6 +45,7 @@ router.post(
   "/upload/image",
   authMiddleware,
   uploadImage,
+  convertHeicHeifMiddleware,
   processImage,
   validateSchemaWithFileAndCleanup(
     createImageSchema,
