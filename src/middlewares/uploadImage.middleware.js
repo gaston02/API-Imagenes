@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // Obtener ruta absoluta del directorio actual (src/)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -21,10 +21,23 @@ console.log("storage: " + JSON.stringify(storage));
 
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true); // Aceptar el archivo si es una imagen
+  const allowedExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".heic",
+    ".heif",
+  ];
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedExtensions.includes(ext)) {
+    cb(null, true); // Aceptar extensiones conocidas de imágenes (aunque el mimetype venga mal)
   } else {
-    cb(new Error("El archivo subido no es una imagen"), false); // Rechazar si no es una imagen
+    cb(
+      new Error("El archivo subido no tiene una extensión de imagen válida"),
+      false
+    );
   }
 };
 
