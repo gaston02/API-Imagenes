@@ -21,14 +21,18 @@ console.log("storage: " + JSON.stringify(storage));
 
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  console.log("archivo de subida: " + file)
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"];
+
+  const isImage = file.mimetype?.startsWith("image/") || allowedExtensions.includes(ext);
+
+  if (isImage) {
     cb(null, true);
   } else {
-    cb(new Error("Solo se permiten imágenes"), false);
+    cb(new Error("Solo se permiten archivos de imagen"), false);
   }
 };
-
-console.log("filtro" + fileFilter);
 
 export const uploadImage = multer({
   storage: storage,
