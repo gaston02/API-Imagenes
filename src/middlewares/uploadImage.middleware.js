@@ -21,23 +21,10 @@ console.log("storage: " + JSON.stringify(storage));
 
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = [
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".webp",
-    ".heic",
-    ".heif",
-  ];
-  const ext = path.extname(file.originalname).toLowerCase();
-
-  if (allowedExtensions.includes(ext)) {
-    cb(null, true); // Aceptar extensiones conocidas de imágenes (aunque el mimetype venga mal)
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
   } else {
-    cb(
-      new Error("El archivo subido no tiene una extensión de imagen válida"),
-      false
-    );
+    cb(new Error("Solo se permiten imágenes"), false);
   }
 };
 
