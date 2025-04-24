@@ -41,6 +41,8 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+console.log("filtro" + fileFilter);
+
 export const uploadImage = multer({
   storage: storage,
   fileFilter: fileFilter,
