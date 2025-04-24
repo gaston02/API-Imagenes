@@ -7,17 +7,17 @@ export const convertHeicHeifMiddleware = async (req, res, next) => {
     if (!req.file) return next();
 
     const filePath = req.file.path;
-    const inputExt = path.extname(filePath).toLowerCase(); // ej: .jpg, .png
+    const inputExt = path.extname(filePath).toLowerCase();
 
-    // Mapear la extensión a formatos válidos para heic-convert
+    // Mapear la extensión a formatos válidos para heic-convert y sus mimetypes
     const extToFormat = {
-      ".jpg": "JPEG",
-      ".jpeg": "JPEG",
-      ".png": "PNG",
-      ".webp": "WEBP",
+      ".jpg": { format: "JPEG", mime: "image/jpeg" },
+      ".jpeg": { format: "JPEG", mime: "image/jpeg" },
+      ".png": { format: "PNG", mime: "image/png" },
+      ".webp": { format: "WEBP", mime: "image/webp" },
     };
 
-    const targetFormat = extToFormat[inputExt] || "JPEG"; // fallback a JPEG si no está mapeado
+    const target = extToFormat[inputExt] || { format: "JPEG", mime: "image/jpeg" };
 
     let outputBuffer;
 
@@ -25,21 +25,19 @@ export const convertHeicHeifMiddleware = async (req, res, next) => {
       const inputBuffer = await fs.readFile(filePath);
       outputBuffer = await heicConvert({
         buffer: inputBuffer,
-        format: targetFormat,
+        format: target.format,
         quality: 1,
       });
     } catch (err) {
-      return next(); // Si falla la conversión, no era HEIC/HEIF
+      return next(); // No es HEIC/HEIF, dejar pasar
     }
 
-    const outputFilePath = filePath.replace(
-      /\.[^/.]+$/,
-      `.${targetFormat.toLowerCase()}`
-    );
+    const outputFilePath = filePath.replace(/\.[^/.]+$/, `.${target.format.toLowerCase()}`);
     await fs.writeFile(outputFilePath, outputBuffer);
 
     req.file.path = outputFilePath;
     req.file.filename = path.basename(outputFilePath);
+    req.file.mimetype = target.mime; // Reemplazar el mimetype
 
     next();
   } catch (error) {
