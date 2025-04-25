@@ -21,7 +21,7 @@ console.log("storage: " + JSON.stringify(storage));
 
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
-  console.log("archivo de subida: " + file)
+  console.log("archivo de subida: " + JSON.stringify(file))
   const ext = path.extname(file.originalname).toLowerCase();
   const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"];
 

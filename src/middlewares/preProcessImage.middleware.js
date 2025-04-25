@@ -4,7 +4,7 @@ import path from "path";
 
 export const convertHeicHeifMiddleware = async (req, res, next) => {
   try {
-    console.log("file" + req.file);
+    console.log("file" + JSON.stringify(req.file));
     if (!req.file) return next();
 
     const filePath = req.file.path;
