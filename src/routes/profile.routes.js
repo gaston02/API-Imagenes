@@ -45,6 +45,10 @@ router.post(
   "/upload/image",
   authMiddleware,
   uploadImage,
+  (req, res, next) => {
+    console.log(">>> multer req.file:", req.file);
+    next();
+  },
   convertHeicHeifMiddleware,
   processImage,
   validateSchemaWithFileAndCleanup(
