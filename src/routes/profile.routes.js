@@ -44,11 +44,11 @@ const uploadsDir = IMAGES_DIR;
 router.post(
   "/upload/image",
   authMiddleware,
-  uploadImage,
-  (req, res, next) => {
-    console.log(">>> multer req.file:", req.file);
-    next();
-  },
+  (req, res, next) => uploadImage(req, res, (err) => {
+    console.log(">>> Multer err:", err && err.code, err && err.message);
+    console.log(">>> Multer req.file:", req.file);
+    next(err);
+  }),
   convertHeicHeifMiddleware,
   processImage,
   validateSchemaWithFileAndCleanup(
