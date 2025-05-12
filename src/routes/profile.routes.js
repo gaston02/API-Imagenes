@@ -45,7 +45,6 @@ router.post(
   "/upload/image",
   authMiddleware,
   uploadImage,
-  convertHeicHeifMiddleware,
   processImage,
   validateSchemaWithFileAndCleanup(
     createImageSchema,

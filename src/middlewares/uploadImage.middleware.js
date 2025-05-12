@@ -17,20 +17,12 @@ const storage = multer.diskStorage({
   },
 });
 
-console.log("storage: " + JSON.stringify(storage));
-
 // Filtro para permitir solo imágenes
 const fileFilter = (req, file, cb) => {
-  console.log("archivo de subida: " + JSON.stringify(file))
-  const ext = path.extname(file.originalname).toLowerCase();
-  const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"];
-
-  const isImage = file.mimetype?.startsWith("image/") || allowedExtensions.includes(ext);
-
-  if (isImage) {
-    cb(null, true);
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true); // Aceptar el archivo si es una imagen
   } else {
-    cb(new Error("Solo se permiten archivos de imagen"), false);
+    cb(new Error("El archivo subido no es una imagen"), false); // Rechazar si no es una imagen
   }
 };
 

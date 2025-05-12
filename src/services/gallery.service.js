@@ -30,8 +30,6 @@ export async function createGallery(galleryData, imageIds = []) {
     images: validImages.map((image) => image._id), // Si no hay imágenes, será un array vacío
   });
 
-  console.log("Valor de public en la nueva galería:", newGallery.public);
-
   if (validImages.length > 0) {
     // Actualizar las imágenes con la referencia a la nueva galería
     await Promise.all(
