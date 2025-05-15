@@ -401,3 +401,46 @@ export async function resetPassword(email, token, newPassword) {
     throw new Error("Ocurrió un error interno al restablecer la contraseña.");
   }
 }
+
+export async function forgotPassword(email) {
+  try {
+    const { email: userEmail, token } = await requestPasswordReset(email);
+    await sendResetPasswordEmail(userEmail, token);
+  } catch (err) {
+    console.error(
+      "[forgotPassword] Error en la orquestación de olvido de contraseña:",
+      err
+    );
+    // Diferenciar errores esperados
+    if (err.message.includes("Usuario no encontrado")) {
+      throw new Error("Usuario no encontrado para olvido de contraseña.");
+    }
+    if (err.message.includes("Error al enviar el correo de recuperación")) {
+      throw new Error("Error al enviar el correo de recuperación.");
+    }
+    // Errores inesperados
+    throw new Error(
+      "Error interno al procesar la solicitud de olvido de contraseña."
+    );
+  }
+}
+
+export async function resetPasswordFlow(email, token, newPassword) {
+  try {
+    await resetPassword(email, token, newPassword);
+  } catch (err) {
+    console.error(
+      "[resetPasswordFlow] Error en la orquestación de cambio de contraseña:",
+      err
+    );
+    // Errores de validación
+    if (err.code === "INVALID_TOKEN") {
+      throw new Error("Token inválido o expirado.");
+    }
+    if (err.code === "USER_NOT_FOUND") {
+      throw new Error("Usuario no encontrado para cambio de contraseña.");
+    }
+    // Errores inesperados
+    throw new Error("Error interno al procesar el cambio de contraseña.");
+  }
+}
