@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import Gallery from "../models/gallery.model.js";
 import { generateResetToken } from "../utils/tokenPassword.util.js";
+import { EMAIL } from "../config.js";
+import { resetPasswordTemplate } from "../utils/emailTemplate.util.js";
+import { apiInstance } from "../libs/brevoClient.js";
 
 export async function createUser(userData) {
   try {
@@ -307,9 +310,94 @@ export async function requestPasswordReset(email) {
     await user.save();
     return {
       email: user.email,
-      token
-    }
+      token,
+    };
   } catch (error) {
     throw new Error(`Error al generar token de reseteo: ${error.message}`);
+  }
+}
+
+export async function sendResetPasswordEmail(to, token) {
+  const senderEmail = EMAIL;
+  const senderName = "picvaul";
+  const subject = "Restablece tu contraseña";
+
+  const htmlContent = resetPasswordTemplate({ token });
+
+  const sendSmtpEmail = {
+    to: [{ email: to }],
+    sender: { name: senderName, email: senderEmail },
+    subject,
+    htmlContent,
+  };
+
+  try {
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log(`Correo de recuperación enviado a ${to}`);
+  } catch (error) {
+    console.error(
+      "Error al enviar correo de recuperación:",
+      error.response?.body || error.message
+    );
+    throw new Error("No se pudo enviar el correo de recuperación.");
+  }
+}
+
+export async function validateResetToken(email, token) {
+  try {
+    const user = await this.findUser(email);
+    if (
+      !user ||
+      !user.resetTokenPassword ||
+      !user.resetTokenExpires ||
+      Date.now() > user.resetTokenExpires.getTime()
+    ) {
+      return false;
+    }
+
+    const isMatch = await bcrypt.compare(token, user.resetTokenPassword);
+    return isMatch;
+  } catch (error) {
+    console.error("Error validando token de reseteo:", error);
+    throw new Error("Ocurrió un problema al validar el token de reseteo.");
+  }
+}
+
+export async function resetPassword(email, token, newPassword) {
+  try {
+    // 1. Validar el token
+    const isValid = await validateResetToken(email, token);
+    if (!isValid) {
+      const err = new Error("Token inválido o expirado");
+      err.code = "INVALID_TOKEN";
+      throw err;
+    }
+
+    // 2. Buscar usuario
+    const user = await this.findUser(email);
+    if (!user) {
+      const err = new Error("Usuario no encontrado");
+      err.code = "USER_NOT_FOUND";
+      throw err;
+    }
+
+    // 3. Hashear y actualizar contraseña
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+
+    // 4. Limpiar campos de reseteo
+    user.resetTokenPassword = null;
+    user.resetTokenExpires = null;
+
+    await user.save();
+    return true;
+  } catch (err) {
+    // Errores esperados (códigos personalizados) se propagan para controlarlos en el controlador
+    if (err.code === "INVALID_TOKEN" || err.code === "USER_NOT_FOUND") {
+      throw err;
+    }
+    // Cualquier otro error es interno
+    console.error("Error interno al restablecer contraseña:", err);
+    throw new Error("Ocurrió un error interno al restablecer la contraseña.");
   }
 }
