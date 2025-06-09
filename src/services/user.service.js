@@ -300,7 +300,7 @@ export async function returnUserDelete(emailUser) {
 
 export async function requestPasswordReset(email) {
   try {
-    const user = await this.findUser(email);
+    const user = await User.findOne({ email: email, status: true });
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
