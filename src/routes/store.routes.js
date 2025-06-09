@@ -62,7 +62,7 @@ router.post("/login", validateSchema(loginSchema), loginController);
 router.post("/logout", logout);
 
 router.post(
-  "/forgot",
+  "/forgot-password",
   validateSchema(emailSchema),
   requestPasswordResetController
 );
