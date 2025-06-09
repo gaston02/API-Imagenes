@@ -77,7 +77,12 @@ export async function getUserController(req, res, next) {
       images: user.images,
     };
 
-    return handleGenericSuccess(res, 200, safeUserData, "Usuario obtenido con éxito!!");
+    return handleGenericSuccess(
+      res,
+      200,
+      safeUserData,
+      "Usuario obtenido con éxito!!"
+    );
   } catch (error) {
     if (error.message.includes("Usuario no encontrado")) {
       return handleGenericError(res, 404, `Usuario no encontrado`);
@@ -141,6 +146,60 @@ export async function updateUserController(req, res, next) {
         `Error al actualizar el usuario: ${error.message}`
       );
     }
+    next(error);
+  }
+}
+
+export async function requestPasswordResetController(req, res, next) {
+  const { email } = req.body;
+  try {
+    const response = await userService.forgotPassword(email);
+    handleGenericSuccess(
+      res,
+      200,
+      response,
+      "Solicitud de restablecimiento de contraseña enviada con exito!!"
+    );
+  } catch (error) {
+    handleGenericError(
+      res,
+      500,
+      `Error al solicitar restablecimiento de contraseña: ${error.message}`
+    );
+    next(error);
+  }
+}
+
+export async function resetPasswordController(req, res, next) {
+  const { email, token, newPassword } = req.body;
+  try {
+    const response = await userService.resetPasswordFlow(
+      email,
+      token,
+      newPassword
+    );
+    handleGenericSuccess(
+      res,
+      200,
+      response,
+      "Restablecimiento de contraseña exitoso!!"
+    );
+  } catch (error) {
+    if (error.code === "INVALID_TOKEN") {
+      handleGenericError(
+        res,
+        400,
+        `Token inválido o expirado: ${error.message}`
+      );
+    }
+    if (error.code === "USER_NOT_FOUND") {
+      handleGenericError(res, 404, `Usuario no encontrado: ${error.message}`);
+    }
+    handleGenericError(
+      res,
+      500,
+      `Error al restablecer contraseña: ${error.message}`
+    );
     next(error);
   }
 }

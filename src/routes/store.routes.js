@@ -4,6 +4,8 @@ import {
   getRandomUserController,
   getPublicUserController,
   getUserController,
+  requestPasswordResetController,
+  resetPasswordController,
 } from "../controllers/user.controller.js";
 import { loginController, logout } from "../controllers/login.controller.js";
 import { profileImage } from "../middlewares/uploadImage.middleware.js";
@@ -21,6 +23,7 @@ import { loginSchema } from "../schemas/login.schema.js";
 import { createUserSchema } from "../schemas/user.schema.js";
 import { idSchema } from "../schemas/id.schema.js";
 import { nameUserSchema } from "../schemas/nameUser.schema.js";
+import { emailSchema } from "../schemas/email.schema.js";
 import { IMAGES_DIR } from "../config.js";
 
 const router = Router();
@@ -54,12 +57,16 @@ router.get(
   getPublicUserController
 );
 
-router.post(
-  "/login",
-  validateSchema(loginSchema),
-  loginController
-);
+router.post("/login", validateSchema(loginSchema), loginController);
 
 router.post("/logout", logout);
+
+router.post(
+  "/forgot-password",
+  validateSchema(emailSchema),
+  requestPasswordResetController
+);
+
+router.post("/reset-password", resetPasswordController);
 
 export default router;
