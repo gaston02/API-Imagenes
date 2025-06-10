@@ -1,5 +1,5 @@
-export function resetPasswordTemplate({ token }) {
-  const resetLink = `https://picvaul.com/reset-password?token=${token}`;
+export function resetPasswordTemplate({ email, token }) {
+  const resetLink = `https://picvaul.com/reset-password?email=${email}&token=${token}`;
   return `<!DOCTYPE html>
 <html>
 <head>

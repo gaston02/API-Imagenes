@@ -322,7 +322,7 @@ export async function sendResetPasswordEmail(to, token) {
   const senderName = "picvaul";
   const subject = "Restablece tu contraseña";
 
-  const htmlContent = resetPasswordTemplate({ token });
+  const htmlContent = resetPasswordTemplate({ to, token });
 
   const sendSmtpEmail = {
     to: [{ email: to }],
