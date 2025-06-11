@@ -345,7 +345,7 @@ export async function sendResetPasswordEmail(to, token) {
 
 export async function validateResetToken(email, token) {
   try {
-    const user = await this.findUser(email);
+    const user = await User.findOne({ email: email, status: true });
     if (
       !user ||
       !user.resetTokenPassword ||
