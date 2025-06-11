@@ -374,7 +374,7 @@ export async function resetPassword(email, token, newPassword) {
     }
 
     // 2. Buscar usuario
-    const user = await this.findUser(email);
+    const user = await User.findOne({ email: email, status: true });
     if (!user) {
       const err = new Error("Usuario no encontrado");
       err.code = "USER_NOT_FOUND";
