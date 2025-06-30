@@ -14,7 +14,7 @@ export const compressImage = async (
     const dir = path.dirname(inputPath);
     const ext = path.extname(inputPath);
     const basename = path.basename(inputPath, ext);
-    const outputPath = path.join(dir, `${basename}-compressed.webp`);
+    const outputPath = path.join(dir, `compressed-${basename}${ext}`);
 
     await sharp(inputPath)
       .resize({
