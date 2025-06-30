@@ -9,6 +9,7 @@ export const processImage = async (req, res, next) => {
     const outputPath = inputPath;
 
     await compressImage(inputPath, outputPath); // Llama a la función para comprimir la imagen
+    outputPath = "compressed-" + inputPath;
     res
       .status(200)
       .json({
