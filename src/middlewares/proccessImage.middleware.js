@@ -2,6 +2,9 @@ import { compressImage } from "../utils/compressImage.util.js";
 
 export const processImage = async (req, res, next) => {
   try {
+    if(!req.file){
+      return next();
+    }
     const inputPath = req.file.path;
     const outputPath = inputPath;
 
