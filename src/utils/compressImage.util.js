@@ -4,7 +4,6 @@ import path from "path";
 
 export const compressImage = async (
   inputPath,
-  outputPath,
   maxWidth = 800,
   quality = 80,
   effort = 6
@@ -12,11 +11,10 @@ export const compressImage = async (
   try {
     await fs.access(inputPath);
 
-    // Procesar outputPath para agregar sufijo -compressed y cambiar extensión a .webp
-    const ext = path.extname(outputPath);
-    const basename = path.basename(outputPath, ext);
-    const dir = path.dirname(outputPath);
-    const finalOutputPath = path.join(dir, `${basename}.webp`);
+    const dir = path.dirname(inputPath);
+    const ext = path.extname(inputPath);
+    const basename = path.basename(inputPath, ext);
+    const outputPath = path.join(dir, `${basename}-compressed.webp`);
 
     await sharp(inputPath)
       .resize({
@@ -27,9 +25,9 @@ export const compressImage = async (
         quality,
         effort,
       })
-      .toFile(finalOutputPath);
+      .toFile(outputPath);
 
-    return finalOutputPath;
+    return outputPath; // ✅ Devolver nuevo path
   } catch (error) {
     throw new Error(`Error al procesar la imagen: ${error.message}`);
   }
