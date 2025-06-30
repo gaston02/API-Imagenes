@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import fs from "fs/promises";
+import path from "path";
 
 export const compressImage = async (
   inputPath,
@@ -9,21 +10,26 @@ export const compressImage = async (
   effort = 6
 ) => {
   try {
-    // Verificar que el archivo de entrada exista
     await fs.access(inputPath);
 
-    // Comprimir la imagen utilizando sharp y WebP
+    // Procesar outputPath para agregar sufijo -compressed y cambiar extensión a .webp
+    const ext = path.extname(outputPath);
+    const basename = path.basename(outputPath, ext);
+    const dir = path.dirname(outputPath);
+    const finalOutputPath = path.join(dir, `${basename}.webp`);
+
     await sharp(inputPath)
       .resize({
-        width: maxWidth, // Redimensionar con un ancho máximo configurable
-        withoutEnlargement: true, // Evitar agrandar imágenes más pequeñas
+        width: maxWidth,
+        withoutEnlargement: true,
       })
       .webp({
-        quality, // Ajustar la calidad según el parámetro
-        effort, // Nivel de esfuerzo de compresión (1 más rápido, 6 mayor compresión)
+        quality,
+        effort,
       })
-      .toFile(outputPath);
+      .toFile(finalOutputPath);
 
+    return finalOutputPath;
   } catch (error) {
     throw new Error(`Error al procesar la imagen: ${error.message}`);
   }
