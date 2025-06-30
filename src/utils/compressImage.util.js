@@ -12,6 +12,8 @@ export const compressImage = async (
     // Verificar que el archivo de entrada exista
     await fs.access(inputPath);
 
+    const compressedOutputPath = "compressed-" + outputPath;
+
     // Comprimir la imagen utilizando sharp y WebP
     await sharp(inputPath)
       .resize({
@@ -23,6 +25,8 @@ export const compressImage = async (
         effort, // Nivel de esfuerzo de compresión (1 más rápido, 6 mayor compresión)
       })
       .toFile(outputPath);
+
+    return compressedOutputPath;
 
   } catch (error) {
     throw new Error(`Error al procesar la imagen: ${error.message}`);
