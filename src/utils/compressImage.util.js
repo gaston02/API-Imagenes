@@ -14,7 +14,7 @@ export const compressImage = async (
     const dir = path.dirname(inputPath);
     const ext = path.extname(inputPath);
     const basename = path.basename(inputPath, ext);
-    const outputPath = path.join(dir, `compressed-${basename}${ext}`);
+    const outputPath = `compressed-${basename}${ext}`;
     console.log(outputPath);
 
     await sharp(inputPath)
