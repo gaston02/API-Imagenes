@@ -51,14 +51,19 @@ export async function authMiddleware(req, res, next) {
 }
 
 export function checkUserOwnership(req, res, next) {
-  const idParams = req.params.id;
-  const loggedInUser = req.user.id; // El id del usuario autenticado desde el token
+  try {
+    const idParams = String(req.params.id);
+    const loggedInUser = String(req.user.id); // req.user.id es ObjectId => str
 
-  if (idParams !== loggedInUser) {
-    return res
-      .status(403)
-      .json({ message: "No tienes permisos para modificar este usuario" });
+    if (idParams !== loggedInUser) {
+      return res.status(403).json({
+        message: "No tienes permisos para modificar este usuario",
+      });
+    }
+
+    next();
+  } catch (e) {
+    return res.status(500).json({ message: "Error al validar propiedad" });
   }
-
-  next();
 }
+
