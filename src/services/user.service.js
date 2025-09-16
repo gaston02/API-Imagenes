@@ -200,16 +200,11 @@ export async function updateUser(id, userData) {
       throw new Error("Usuario no encontrado");
     }
 
-    // Si userData.password existe, encriptarlo antes de actualizar
-    if (userData.password) {
-      userData.password = await bcrypt.hash(userData.password, 10);
-    }
-
     const updatedUser = await User.findOneAndUpdate(
       { _id: objectId, status: true },
       { $set: userData },
       { new: true }
-    );
+    ).select("-password"); // Excluir el campo password
 
     if (!updatedUser) {
       throw new Error("No se pudo actualizar el usuario");

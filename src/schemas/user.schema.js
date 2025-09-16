@@ -101,18 +101,6 @@ export const updateUserSchema = z.object({
         message: "El email no puede estar vacío y debe ser válido",
       }
     ),
-  password: z
-    .string()
-    .optional()
-    .refine(
-      (data) =>
-        data === undefined ||
-        (data.trim() !== "" && data.trim().length >= 6 && /[A-Z]/.test(data),
-        {
-          message:
-            "La contraseña debe tener al menos 6 caracteres y una letra mayúscula",
-        })
-    ),
   profileImage: z
     .string()
     .optional()
