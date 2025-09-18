@@ -128,8 +128,10 @@ export async function updateUserController(req, res, next) {
     userData.profileImage = req.processedImagePath; // Asignar la ruta procesada de la imagen
   }
 
+  const removeImage = req.body.clearImage;
+
   try {
-    const updateUser = await userService.updateUser(id, userData);
+    const updateUser = await userService.updateUser(id, userData, removeImage);
     handleGenericSuccess(
       res,
       200,
