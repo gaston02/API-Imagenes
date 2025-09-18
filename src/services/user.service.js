@@ -1,11 +1,16 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 import User from "../models/user.model.js";
 import Gallery from "../models/gallery.model.js";
 import { generateResetToken } from "../utils/tokenPassword.util.js";
 import { EMAIL } from "../config.js";
 import { resetPasswordTemplate } from "../utils/emailTemplate.util.js";
 import { apiInstance } from "../libs/brevoClient.js";
+import { IMAGES_DIR } from "../config.js";
+
+const imagesDir = IMAGES_DIR;
 
 export async function createUser(userData) {
   try {
@@ -190,9 +195,8 @@ export async function publicGetUser(nameUser) {
   }
 }
 
-export async function updateUser(id, userData) {
+export async function updateUser(id, userData, clearImage = false) {
   try {
-    // Convertir id a ObjectId
     const objectId = new mongoose.Types.ObjectId(id);
 
     const existingUser = await User.findOne({ _id: objectId });
@@ -200,11 +204,18 @@ export async function updateUser(id, userData) {
       throw new Error("Usuario no encontrado");
     }
 
+    if (clearImage) {
+      await removeProfileImage(objectId, clearImage);
+      // Asegurarse de que userData no sobrescriba el cambio
+      delete userData.profileImage;
+    }
+
+    // Aplicar los demás cambios al usuario
     const updatedUser = await User.findOneAndUpdate(
       { _id: objectId, status: true },
       { $set: userData },
       { new: true }
-    ).select("-password"); // Excluir el campo password
+    ).select("-password");
 
     if (!updatedUser) {
       throw new Error("No se pudo actualizar el usuario");
@@ -213,6 +224,63 @@ export async function updateUser(id, userData) {
     return updatedUser;
   } catch (error) {
     throw new Error(`Error al modificar el usuario: ${error.message}`);
+  }
+}
+
+export async function removeProfileImage(idUser, clearImage) {
+  try {
+    const existingUser = await User.findOne({
+      _id: idUser,
+      status: true,
+    }).select("-password");
+
+    if (!existingUser) {
+      throw new Error("Usuario no encontrado.");
+    }
+
+    if (clearImage) {
+      await deleteUserProfileImage(idUser, true);
+      existingUser.profileImage = null;
+      await existingUser.save();
+    }
+
+    return existingUser;
+  } catch (error) {
+    throw new Error(`Error al remover la imagen de perfil: ${error.message}`);
+  }
+}
+
+export async function deleteUserProfileImage(userId, clearImage) {
+  try {
+    if (!clearImage) {
+      return;
+    }
+
+    // Buscar al usuario y obtener la ruta de la imagen
+    const user = await User.findById(userId).select("profileImage");
+    if (!user) {
+      throw new Error("Usuario no encontrado.");
+    }
+
+    const relativePath = user.profileImage;
+
+    if (!relativePath) {
+      console.warn("El usuario no tiene una imagen de perfil para eliminar.");
+      return;
+    }
+
+    // Construir la ruta absoluta de la imagen
+    const absolutePath = path.join(imagesDir, relativePath);
+
+    // Verificar si el archivo existe antes de eliminarlo
+    if (fs.existsSync(absolutePath)) {
+      await fs.promises.unlink(absolutePath); // Eliminar el archivo físicamente
+      console.log(`Imagen de perfil eliminada: ${absolutePath}`);
+    } else {
+      console.warn(`El archivo no existe: ${absolutePath}`);
+    }
+  } catch (error) {
+    throw new Error(`Error al eliminar la imagen de perfil: ${error.message}`);
   }
 }
 
