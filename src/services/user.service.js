@@ -203,39 +203,36 @@ export async function updateUser(id, userData, clearImage = false) {
     const existingUser = await User.findOne({ _id: objectId, status: true });
     if (!existingUser) throw new Error("Usuario no encontrado");
 
+    // 1) Normaliza clearImage
     const shouldRemove = toBoolean(clearImage);
 
-    // Si hay archivo nuevo en userData.profileImage, NO lo borres
-    // prioriza el file nuevo frente a clearImage (si quieres que clearImage gane, invierte esta lógica)
-    if (shouldRemove && !userData.profileImage) {
-      await removeProfileImage(objectId, true);
-      // Mejor usar $unset abajo en lugar de borrar aquí del payload
-      updateOps.$unset.profileImage = "";
-    }
-
-    // Construir update atómico
+    // 2) Declara el contenedor de la actualización (ANTES de usarlo)
     const updateOps = { $set: {}, $unset: {} };
 
-    // Whitelist de campos
+    // 3) Whitelist de campos editables (evita que te lleguen cosas raras)
     const allowed = ["nameUser", "email", "userInfo"];
     for (const k of allowed) {
       if (userData[k] !== undefined) updateOps.$set[k] = userData[k];
     }
 
-    // Si vino nueva imagen, setéala
+    // 4) Si llegó una NUEVA imagen en userData.profileImage => priorízala
     if (userData.profileImage) {
+      // si quieres, aquí puedes llamar a deleteUserProfileImage para borrar la anterior
       updateOps.$set.profileImage = userData.profileImage;
     }
 
-    // Si debemos limpiar y no hay imagen nueva en este request, desasignar
+    // 5) Si se debe eliminar imagen y NO vino una nueva en este request => UNSET
     if (shouldRemove && !userData.profileImage) {
-      updateOps.$unset.profileImage = ""; // o $set: { profileImage: null }
+      // si además quieres borrar el archivo físico:
+      // await deleteUserProfileImage(objectId, true);
+      updateOps.$unset.profileImage = ""; // elimina el campo en la DB
     }
 
-    // Limpia objetos vacíos para no mandar operadores vacíos
+    // 6) Limpia operadores vacíos para no enviar objetos vacíos a Mongo
     if (Object.keys(updateOps.$set).length === 0) delete updateOps.$set;
     if (Object.keys(updateOps.$unset).length === 0) delete updateOps.$unset;
 
+    // 7) Ejecuta update
     const updatedUser = await User.findOneAndUpdate(
       { _id: objectId, status: true },
       updateOps,
