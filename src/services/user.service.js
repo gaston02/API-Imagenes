@@ -9,6 +9,7 @@ import { EMAIL } from "../config.js";
 import { resetPasswordTemplate } from "../utils/emailTemplate.util.js";
 import { apiInstance } from "../libs/brevoClient.js";
 import { IMAGES_DIR } from "../config.js";
+import { toBoolean } from "../utils/boolean.util.js";
 
 const imagesDir = IMAGES_DIR;
 
@@ -199,27 +200,49 @@ export async function updateUser(id, userData, clearImage = false) {
   try {
     const objectId = new mongoose.Types.ObjectId(id);
 
-    const existingUser = await User.findOne({ _id: objectId });
-    if (!existingUser) {
-      throw new Error("Usuario no encontrado");
+    const existingUser = await User.findOne({ _id: objectId, status: true });
+    if (!existingUser) throw new Error("Usuario no encontrado");
+
+    const shouldRemove = toBoolean(clearImage);
+
+    // Si hay archivo nuevo en userData.profileImage, NO lo borres
+    // prioriza el file nuevo frente a clearImage (si quieres que clearImage gane, invierte esta lógica)
+    if (shouldRemove && !userData.profileImage) {
+      await removeProfileImage(objectId, true);
+      // Mejor usar $unset abajo en lugar de borrar aquí del payload
+      updateOps.$unset.profileImage = "";
     }
 
-    if (clearImage) {
-      await removeProfileImage(objectId, clearImage);
-      // Asegurarse de que userData no sobrescriba el cambio
-      delete userData.profileImage;
+    // Construir update atómico
+    const updateOps = { $set: {}, $unset: {} };
+
+    // Whitelist de campos
+    const allowed = ["nameUser", "email", "userInfo"];
+    for (const k of allowed) {
+      if (userData[k] !== undefined) updateOps.$set[k] = userData[k];
     }
 
-    // Aplicar los demás cambios al usuario
+    // Si vino nueva imagen, setéala
+    if (userData.profileImage) {
+      updateOps.$set.profileImage = userData.profileImage;
+    }
+
+    // Si debemos limpiar y no hay imagen nueva en este request, desasignar
+    if (shouldRemove && !userData.profileImage) {
+      updateOps.$unset.profileImage = ""; // o $set: { profileImage: null }
+    }
+
+    // Limpia objetos vacíos para no mandar operadores vacíos
+    if (Object.keys(updateOps.$set).length === 0) delete updateOps.$set;
+    if (Object.keys(updateOps.$unset).length === 0) delete updateOps.$unset;
+
     const updatedUser = await User.findOneAndUpdate(
       { _id: objectId, status: true },
-      { $set: userData },
+      updateOps,
       { new: true }
     ).select("-password");
 
-    if (!updatedUser) {
-      throw new Error("No se pudo actualizar el usuario");
-    }
+    if (!updatedUser) throw new Error("No se pudo actualizar el usuario");
 
     return updatedUser;
   } catch (error) {
@@ -229,18 +252,18 @@ export async function updateUser(id, userData, clearImage = false) {
 
 export async function removeProfileImage(idUser, clearImage) {
   try {
+    const shouldRemove = toBoolean(clearImage);
+
     const existingUser = await User.findOne({
       _id: idUser,
       status: true,
     }).select("-password");
 
-    if (!existingUser) {
-      throw new Error("Usuario no encontrado.");
-    }
+    if (!existingUser) throw new Error("Usuario no encontrado.");
 
-    if (clearImage) {
+    if (shouldRemove) {
       await deleteUserProfileImage(idUser, true);
-      existingUser.profileImage = null;
+      existingUser.profileImage = null; // opcional si también usas $unset luego
       await existingUser.save();
     }
 
@@ -249,7 +272,6 @@ export async function removeProfileImage(idUser, clearImage) {
     throw new Error(`Error al remover la imagen de perfil: ${error.message}`);
   }
 }
-
 export async function deleteUserProfileImage(userId, clearImage) {
   try {
     if (!clearImage) {

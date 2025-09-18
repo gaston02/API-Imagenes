@@ -2,6 +2,7 @@ import * as userService from "../services/user.service.js";
 import { handleGenericError } from "../utils/error.util.js";
 import { handleGenericSuccess } from "../utils/success.util.js";
 
+
 export async function createUserController(req, res, next) {
   try {
     const userData = {
@@ -113,39 +114,6 @@ export async function getPublicUserController(req, res, next) {
         res,
         400,
         `Error al obtener un usuario random: ${error.message}`
-      );
-    }
-    next(error);
-  }
-}
-
-export async function updateUserController(req, res, next) {
-  const id = req.params.id;
-  const userData = req.body;
-
-  // Asegúrate de agregar processedImagePath si existe
-  if (req.processedImagePath) {
-    userData.profileImage = req.processedImagePath; // Asignar la ruta procesada de la imagen
-  }
-
-  const removeImage = req.body.clearImage;
-
-  try {
-    const updateUser = await userService.updateUser(id, userData, removeImage);
-    handleGenericSuccess(
-      res,
-      200,
-      updateUser,
-      "Usuario actualizado con exito!!"
-    );
-  } catch (error) {
-    if (error.message.includes("Usuario no encontrados")) {
-      handleGenericError(res, 404, `Usuario no encontrado`);
-    } else {
-      handleGenericError(
-        res,
-        400,
-        `Error al actualizar el usuario: ${error.message}`
       );
     }
     next(error);
