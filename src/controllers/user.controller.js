@@ -61,7 +61,8 @@ export async function getRandomUserController(req, res, next) {
 export async function getUserController(req, res, next) {
   try {
     const nameUser = req.params.nameUser;
-    const user = await userService.getUser(nameUser);
+    const lang = req.query.lang || "es"; // 🔹 nuevo: idioma por query (default español)
+    const user = await userService.getUser(nameUser, lang);
 
     if (!user) {
       return handleGenericError(res, 404, `Usuario no encontrado`);
@@ -100,20 +101,23 @@ export async function getUserController(req, res, next) {
 export async function getPublicUserController(req, res, next) {
   try {
     const nameUser = req.params.nameUser;
-    const user = await userService.publicGetUser(nameUser);
+    const lang = req.query.lang || "es"; // 🔹 nuevo: idioma por query (default español)
+
+    const user = await userService.publicGetUser(nameUser, lang);
+
     if (!user) {
-      handleGenericError(res, 404, `Usuario no encontrado`);
+      return handleGenericError(res, 404, "Usuario no encontrado");
     }
 
-    handleGenericSuccess(res, 200, user, "Usuario obtenido con exito!!");
+    handleGenericSuccess(res, 200, user, "Usuario obtenido con éxito!!");
   } catch (error) {
     if (error.message.includes("Usuario no encontrado")) {
-      handleGenericError(res, 404, `Usuario no encontrado`);
+      handleGenericError(res, 404, "Usuario no encontrado");
     } else {
       handleGenericError(
         res,
         400,
-        `Error al obtener un usuario random: ${error.message}`
+        `Error al obtener un usuario público: ${error.message}`
       );
     }
     next(error);

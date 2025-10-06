@@ -11,3 +11,4 @@ export const TOKEN_SECRET = process.env.TOKEN_SECRET;
 export const IMAGES_DIR = path.join(__dirname, "uploads");
 export const API_KEY_BREVO = process.env.BREVO_API_KEY;
 export const EMAIL = process.env.SUPPORT_EMAIL;
+export const MYMEMORY = "https://api.mymemory.translated.net/get";

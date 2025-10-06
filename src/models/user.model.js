@@ -27,9 +27,16 @@ const userSchema = new mongoose.Schema(
       sparse: true, // Permite múltiples `null` en índices únicos
     },
     userInfo: {
-      type: String,
-      required: false,
-      trim: true,
+      es: {
+        type: String,
+        required: false,
+        trim: true,
+      },
+      en: {
+        type: String,
+        required: false,
+        trim: true,
+      },
     },
     galleries: [
       {

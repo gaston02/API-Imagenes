@@ -10,6 +10,8 @@ import { resetPasswordTemplate } from "../utils/emailTemplate.util.js";
 import { apiInstance } from "../libs/brevoClient.js";
 import { IMAGES_DIR } from "../config.js";
 import { toBoolean } from "../utils/boolean.util.js";
+import { normalizeText } from "../utils/normalizeText.util.js";
+import { translateText } from "../libs/translate.js";
 
 const imagesDir = IMAGES_DIR;
 
@@ -148,51 +150,86 @@ export async function findUser(emailUser) {
   }
 }
 
-export async function getUser(nameUser) {
+export async function getUser(nameUser, lang = "es") {
   try {
-    const user = await User.findOne({ nameUser: nameUser, status: true })
-      .populate({
-        path: "images",
-      })
-      .populate({
-        path: "galleries",
-      });
+    let user = await User.findOne({ nameUser, status: true })
+      .populate({ path: "images" })
+      .populate({ path: "galleries" });
 
-    if (!user) {
-      throw new Error("Usuario no encontrado");
+    if (!user) throw new Error("Usuario no encontrado");
+
+    if (["es", "en"].includes(lang)) {
+      const val = (user.userInfo?.[lang] || "").trim();
+      if (!val) {
+        await translateUserInfo(nameUser, lang);
+        user = await User.findOne({ nameUser, status: true })
+          .populate({ path: "images" })
+          .populate({ path: "galleries" });
+      }
     }
 
-    // Crear un nuevo objeto sin la contraseña
     const { password, ...userWithoutPassword } = user.toObject();
-
     return userWithoutPassword;
   } catch (error) {
     throw new Error(`Error al obtener el usuario: ${error.message}`);
   }
 }
 
-export async function publicGetUser(nameUser) {
+// ✅ publicGetUser: traduce SOLO si falta el campo pedido y luego relee
+export async function publicGetUser(nameUser, lang = "es") {
   try {
-    const user = await User.findOne({ nameUser: nameUser, status: true })
-      .populate({
-        path: "images",
-        match: { public: true },
-      })
-      .populate({
-        path: "galleries",
-        match: { public: true },
-      });
+    let user = await User.findOne({ nameUser, status: true })
+      .populate({ path: "images", match: { public: true } })
+      .populate({ path: "galleries", match: { public: true } });
 
-    if (!user) {
-      throw new Error("Usuario no encontrado");
+    if (!user) throw new Error("Usuario no encontrado");
+
+    if (["es", "en"].includes(lang)) {
+      const val = (user.userInfo?.[lang] || "").trim();
+      if (!val) {
+        await translateUserInfo(nameUser, lang); // guarda en DB
+        // 🔁 relee para devolver ya actualizado
+        user = await User.findOne({ nameUser, status: true })
+          .populate({ path: "images", match: { public: true } })
+          .populate({ path: "galleries", match: { public: true } });
+      }
     }
 
-    // Crear un nuevo objeto sin la contraseña
     const { password, ...userWithoutPassword } = user.toObject();
-
     return userWithoutPassword;
   } catch (error) {
     throw new Error(`Error al obtener el usuario: ${error.message}`);
+  }
+}
+
+// ✅ translateUserInfo: toma el TEXTO fuente correcto (es↔en), normaliza y traduce
+export async function translateUserInfo(nameUser, targetLanguage) {
+  try {
+    const user = await User.findOne(
+      { nameUser, status: true },
+      { userInfo: 1 }
+    );
+    if (!user) throw new Error("Usuario no encontrado");
+
+    const sourceLang = targetLanguage === "en" ? "es" : "en";
+    const sourceText = (user.userInfo?.[sourceLang] || "").trim();
+    if (!sourceText)
+      throw new Error(`No hay userInfo.${sourceLang} para traducir`);
+
+    const normalized = normalizeText(sourceText);
+    const translated = await translateText(normalized, targetLanguage);
+
+    await User.updateOne(
+      { nameUser, status: true },
+      {
+        $set: {
+          [`userInfo.${sourceLang}`]: normalized, // guarda normalizado el origen
+          [`userInfo.${targetLanguage}`]: translated, // y la traducción
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error(`Error al traducir el texto: ${error.message}`);
   }
 }
 
